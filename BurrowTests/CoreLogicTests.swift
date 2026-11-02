@@ -39,6 +39,53 @@ final class NotchGeometryTests: XCTestCase {
     }
 }
 
+final class ProximityTests: XCTestCase {
+    private let rect = CGRect(x: 100, y: 500, width: 200, height: 32)
+
+    func test_insideRect_isFull() {
+        XCTAssertEqual(NotchGeometry.proximity(of: CGPoint(x: 200, y: 510), to: rect, radius: 90), 1)
+    }
+
+    func test_belowRect_fadesLinearly() {
+        XCTAssertEqual(NotchGeometry.proximity(of: CGPoint(x: 200, y: 455), to: rect, radius: 90), 0.5, accuracy: 0.001)
+        XCTAssertEqual(NotchGeometry.proximity(of: CGPoint(x: 200, y: 400), to: rect, radius: 90), 0)
+    }
+
+    func test_sideApproach_usesHorizontalDistance() {
+        XCTAssertEqual(NotchGeometry.proximity(of: CGPoint(x: 345, y: 520), to: rect, radius: 90), 0.5, accuracy: 0.001)
+    }
+
+    func test_zeroRadius_isBinary() {
+        XCTAssertEqual(NotchGeometry.proximity(of: CGPoint(x: 99, y: 510), to: rect, radius: 0), 0)
+    }
+}
+
+final class DisplaySelectorTests: XCTestCase {
+    // Kullanıcının düzeni: ana ekran harici LG (çentiksiz), MacBook ikincil (çentikli)
+    private let lg = ScreenDescriptor(id: 1, hasNotch: false, isPrimary: true)
+    private let macbook = ScreenDescriptor(id: 2, hasNotch: true, isPrimary: false)
+
+    func test_notched_picksMacBookEvenWhenNotPrimary() {
+        XCTAssertEqual(DisplaySelector.select(.notched, from: [lg, macbook]), [2])
+    }
+
+    func test_notched_fallsBackToPrimaryWhenLidClosed() {
+        XCTAssertEqual(DisplaySelector.select(.notched, from: [lg]), [1])
+    }
+
+    func test_primary_picksMenuBarScreen() {
+        XCTAssertEqual(DisplaySelector.select(.primary, from: [lg, macbook]), [1])
+    }
+
+    func test_all_picksEveryScreen() {
+        XCTAssertEqual(DisplaySelector.select(.all, from: [lg, macbook]), [1, 2])
+    }
+
+    func test_noScreens_isEmpty() {
+        XCTAssertEqual(DisplaySelector.select(.notched, from: []), [])
+    }
+}
+
 final class ActivityResolverTests: XCTestCase {
     func test_noTransient_showsMediaWhenActive() {
         XCTAssertEqual(ActivityResolver.resolve(transient: nil, isMediaActive: true), .media)

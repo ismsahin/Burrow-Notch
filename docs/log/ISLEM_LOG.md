@@ -76,3 +76,18 @@ Her oturum sonunda en alta yeni kayıt ekle. **Eski kayıtları silme veya deği
 - Doğrulama: Release çalıştırması 41494067895 yeşil → v1.0.3. İndirilen DMG: SHA-256 OK, `codesign --strict` OK,
   Authority=Burrow Self-Signed, SUFeedURL doğru, Applications kısayolu var. Tüm varlıklar `latest/download` ile 200.
 - Not: Kullanıcının gördüğü 404, sürüm yüklenmeden önce denendiği içindi.
+
+## [006] 2026-11-02 — Yaklaşma efekti, açılma biçimi, ekran seçimi
+- Yapan: Claude Code (Opus 5.5)
+- İstek: Alcove gibi imleç yaklaşınca efekt; tıklayınca mı / bekleyince mi açılsın (süre ayarlı); hangi ekranda
+  (çentikli / ana / ikisi) görünsün; ayarlar nerede.
+- Ne yapıldı:
+  - `AppSettings`: `openMode` (.hover/.click), `proximityEffect`, `displayMode` (.notched/.primary/.all). Eski
+    `hoverToExpand` / `showOnAllDisplays` anahtarları otomatik taşınıyor (kullanıcının "tüm ekranlar" seçimi korundu).
+  - Saf mantık: `NotchGeometry.proximity(of:to:radius:)` ve `DisplaySelector.select` (+11 test).
+    Birincil ekran `NSScreen.screens.first` (NSScreen.main odaktaki pencereye göre değişir, kullanılmaz).
+  - `NotchViewModel.proximity` + `displayedCompactSize`; çentik 90 pt'den itibaren en fazla 34×7 pt kabarır,
+    gölge belirir. İsabet alanı kabarmış boyutu kullanır.
+  - `applicationShouldHandleReopen` → ayarlar. Ayarlar penceresi `orderFrontRegardless` ile öne alınıyor (hata düzeltmesi).
+  - DEBUG kancasına `peek|half|rest`.
+- Doğrulama: 47/47 test. Ekran görüntüsü: dinlenme/yarı/tam yakınlık kabarması ve yeni Genel ayarları.

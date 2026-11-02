@@ -30,6 +30,7 @@ struct NotchRootView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .animation(animation, value: viewModel.isExpanded)
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: activity.current)
+        .animation(.interactiveSpring(response: 0.32, dampingFraction: 0.72), value: viewModel.proximity)
     }
 
     private var notchBody: some View {
@@ -52,7 +53,7 @@ struct NotchRootView: View {
         .frame(width: size.width, height: size.height)
         .clipShape(shape)
         .overlay(dropHighlight(shape))
-        .shadow(color: .black.opacity(viewModel.isExpanded ? 0.45 : 0), radius: 14, y: 6)
+        .shadow(color: .black.opacity(viewModel.isExpanded ? 0.45 : 0.35 * viewModel.proximity), radius: viewModel.isExpanded ? 14 : 8, y: viewModel.isExpanded ? 6 : 3)
         .contentShape(shape)
         .onTapGesture {
             if !viewModel.isExpanded { viewModel.expand() }

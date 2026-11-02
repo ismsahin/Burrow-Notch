@@ -68,12 +68,37 @@ final class AppSettingsTests: XCTestCase {
         defer { defaults.removePersistentDomain(forName: suite) }
 
         let settings = AppSettings(defaults: defaults)
-        XCTAssertTrue(settings.hoverToExpand)
+        XCTAssertEqual(settings.openMode, .hover)
+        XCTAssertTrue(settings.proximityEffect)
+        XCTAssertEqual(settings.displayMode, .notched)
         XCTAssertFalse(settings.replaceSystemHUD, "Erişilebilirlik isteyen özellik varsayılan kapalı olmalı")
         XCTAssertEqual(settings.lowBatteryThreshold, 20)
 
         settings.enableMirror = false
         XCTAssertFalse(AppSettings(defaults: defaults).enableMirror)
+    }
+
+    func test_legacySettings_areMigrated() {
+        let suite = "BurrowTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.set(false, forKey: AppSettings.Key.legacyHoverToExpand)
+        defaults.set(true, forKey: AppSettings.Key.legacyShowOnAllDisplays)
+        let settings = AppSettings(defaults: defaults)
+        XCTAssertEqual(settings.openMode, .click)
+        XCTAssertEqual(settings.displayMode, .all)
+    }
+
+    func test_newModes_persist() {
+        let suite = "BurrowTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let settings = AppSettings(defaults: defaults)
+        settings.openMode = .click
+        settings.displayMode = .primary
+        let reloaded = AppSettings(defaults: defaults)
+        XCTAssertEqual(reloaded.openMode, .click)
+        XCTAssertEqual(reloaded.displayMode, .primary)
     }
 
     func test_lowBatteryThreshold_isClamped() {

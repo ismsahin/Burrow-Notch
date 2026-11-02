@@ -22,6 +22,7 @@ Depo public, secret'lar kurulu, release hattı uçtan uca yeşil (test → derle
 - [x] Ayarlar penceresi (5 sekme), menü çubuğu simgesi, girişte başlat
 - [x] Sparkle 2 + release.yml (test → derle → imzala → EdDSA → appcast → Release)
 - [x] install.sh (SHA-256 + codesign + sabitlenmiş sertifika parmak izi)
+- [x] v1.0.4: yaklaşınca büyü efekti, açılma biçimi (bekleme/tıklama + süre), ekran seçimi (çentikli/ana/tümü)
 - [x] Burrow.dmg: sürükle-bırak penceresi (açık arka plan, ok, Applications kısayolu); release.yml'e eklendi
 - [x] Kod incelemesi: 10 bulgu düzeltildi (bkz. ISLEM_LOG kayıt 3)
 - [x] Hafıza yapısı: AGENTS/CLAUDE/GEMINI.md, kararlar (7), referanslar, promptlar, örnekler, log

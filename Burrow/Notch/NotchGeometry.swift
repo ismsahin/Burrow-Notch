@@ -68,6 +68,41 @@ struct NotchGeometry: Equatable {
     }
 }
 
+extension NotchGeometry {
+    /// İmlecin dikdörtgene yakınlığı: içindeyse 1, `radius` ve ötesinde 0, arada doğrusal.
+    /// Yalnızca yanlardan ve alttan yaklaşma sayılır (üst kenar ekranın tepesi).
+    static func proximity(of point: CGPoint, to rect: CGRect, radius: CGFloat) -> Double {
+        guard radius > 0 else { return rect.contains(point) ? 1 : 0 }
+        let dx = max(0, max(rect.minX - point.x, point.x - rect.maxX))
+        let dy = max(0, rect.minY - point.y)
+        let distance = (dx * dx + dy * dy).squareRoot()
+        return Double(max(0, 1 - distance / radius))
+    }
+}
+
+/// Ekran seçimi için AppKit'ten bağımsız tanım (test edilebilir).
+struct ScreenDescriptor: Equatable {
+    let id: CGDirectDisplayID
+    let hasNotch: Bool
+    let isPrimary: Bool
+}
+
+enum DisplaySelector {
+    static func select(_ mode: DisplayMode, from screens: [ScreenDescriptor]) -> [CGDirectDisplayID] {
+        let primary = screens.first(where: \.isPrimary) ?? screens.first
+        switch mode {
+        case .all:
+            return screens.map(\.id)
+        case .primary:
+            return primary.map { [$0.id] } ?? []
+        case .notched:
+            let notched = screens.filter(\.hasNotch)
+            if !notched.isEmpty { return notched.map(\.id) }
+            return primary.map { [$0.id] } ?? []
+        }
+    }
+}
+
 extension NSScreen {
     var notchGeometry: NotchGeometry {
         NotchGeometry.make(
@@ -85,8 +120,13 @@ extension NSScreen {
         deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID
     }
 
-    /// Tercih edilen ekran: önce çentikli dahili ekran, yoksa ana ekran.
-    static var preferredNotchScreen: NSScreen? {
-        screens.first(where: { $0.hasNotch }) ?? main ?? screens.first
+    /// Not: `NSScreen.main` odaktaki pencerenin ekranıdır ve değişir; birincil (menü çubuklu) ekran `screens.first`'tür.
+    static func screens(for mode: DisplayMode) -> [NSScreen] {
+        let all = screens
+        let descriptors = all.enumerated().compactMap { index, screen in
+            screen.displayID.map { ScreenDescriptor(id: $0, hasNotch: screen.hasNotch, isPrimary: index == 0) }
+        }
+        let ids = DisplaySelector.select(mode, from: descriptors)
+        return all.filter { screen in screen.displayID.map(ids.contains) ?? false }
     }
 }

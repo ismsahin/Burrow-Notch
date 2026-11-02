@@ -27,6 +27,8 @@ final class NotchViewModel: ObservableObject {
     @Published private(set) var isExpanded = false
     @Published var tab: NotchTab = .home
     @Published var isDropTargeted = false
+    /// İmlecin kapalı çentiğe yakınlığı (0…1). Alcove tarzı "yaklaşınca kabarma" efekti için.
+    @Published private(set) var proximity: Double = 0
 
     let services: AppServices
     static let topRadius: CGFloat = 6
@@ -37,6 +39,20 @@ final class NotchViewModel: ObservableObject {
         self.services = services
     }
 
+    /// Yakınlıkta en fazla bu kadar büyür (genişlik / yükseklik, pt).
+    static let proximityGrowth = CGSize(width: 34, height: 7)
+    /// İmleç bu mesafeden itibaren etki başlar (pt).
+    static let proximityRadius: CGFloat = 90
+
+    /// Küçük titreşimleri yayınlama (gereksiz yeniden çizim olmasın).
+    func setProximity(_ value: Double) {
+        let clamped = min(1, max(0, value))
+        let snapped = clamped < 0.02 ? 0 : clamped
+        if abs(snapped - proximity) > 0.025 || (snapped == 0) != (proximity == 0) || (snapped == 1) != (proximity == 1) {
+            proximity = snapped
+        }
+    }
+
     func updateGeometry(_ geometry: NotchGeometry) {
         if geometry != self.geometry { self.geometry = geometry }
     }
@@ -44,12 +60,20 @@ final class NotchViewModel: ObservableObject {
     var topRadius: CGFloat { isExpanded ? Self.expandedTopRadius : Self.topRadius }
     var bottomRadius: CGFloat { isExpanded ? 28 : 10 }
 
-    /// Kapalı hâlde gösterilen boyut (çentik + canlı etkinlik payı + şekil kıvrımları).
+    /// Kapalı hâlde dinlenme boyutu (çentik + canlı etkinlik payı + şekil kıvrımları). İsabet alanı bundan hesaplanır.
     func compactSize(for activity: LiveActivity) -> CGSize {
         CGSize(
             width: geometry.notchSize.width + activity.extraWidth + Self.topRadius * 2,
             height: geometry.notchSize.height
         )
+    }
+
+    /// Çizilen boyut: dinlenme boyutu + yakınlık kabarması.
+    func displayedCompactSize(for activity: LiveActivity) -> CGSize {
+        let base = compactSize(for: activity)
+        let p = CGFloat(services.settings.proximityEffect ? proximity : 0)
+        return CGSize(width: base.width + Self.proximityGrowth.width * p,
+                      height: base.height + Self.proximityGrowth.height * p)
     }
 
     var expandedSize: CGSize {
@@ -58,12 +82,13 @@ final class NotchViewModel: ObservableObject {
     }
 
     func currentSize(for activity: LiveActivity) -> CGSize {
-        isExpanded ? expandedSize : compactSize(for: activity)
+        isExpanded ? expandedSize : displayedCompactSize(for: activity)
     }
 
     func expand(tab: NotchTab? = nil) {
         if let tab { self.tab = tab }
         guard !isExpanded else { return }
+        proximity = 0
         isExpanded = true
         if services.settings.hapticsEnabled {
             NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)

@@ -4,6 +4,15 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/). Sürümler `1.
 
 ## [Yayınlanmamış]
 
+### Eklendi (v1.0.4)
+- **Yaklaşınca büyü** (Alcove efekti): imleç çentiğe yaklaştıkça çentik yumuşakça kabarır. Ayarlardan kapatılabilir.
+- **Açılma biçimi**: "Üzerinde bekleyince" (bekleme süresi 0–1,5 sn ayarlanabilir) veya "Tıklayınca".
+- **Ekran seçimi**: Çentikli ekran (MacBook) / Ana ekran / Tüm ekranlar.
+- Uygulamaya tekrar tıklayınca (Uygulamalar'dan) ayarlar açılır.
+
+### Düzeltildi (v1.0.4)
+- Ayarlar penceresi diğer pencerelerin arkasında açılıyordu.
+
 ### Eklendi
 - Çentik paneli: üzerine gelince/tıklayınca açılan, yay animasyonlu, çentiksiz ekranlarda sanal çentik.
 - Canlı etkinlikler: çalan müzik (kapak + ekolayzer), şarj, düşük pil, ses/parlaklık HUD, Bluetooth cihaz.

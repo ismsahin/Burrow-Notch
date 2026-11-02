@@ -14,7 +14,7 @@ struct SettingsView: View {
             updates.tabItem { Label("Güncelleme", systemImage: "arrow.triangle.2.circlepath") }
             about.tabItem { Label("Hakkında", systemImage: "info.circle") }
         }
-        .frame(width: 500, height: 420)
+        .frame(width: 520, height: 540)
     }
 
     private var general: some View {
@@ -24,24 +24,50 @@ struct SettingsView: View {
                 if let error = launchAtLogin.lastError {
                     Text(error).font(.caption).foregroundStyle(.red)
                 }
-                Toggle("Üzerine gelince aç", isOn: $settings.hoverToExpand)
-                if settings.hoverToExpand {
-                    Slider(value: $settings.hoverDelay, in: 0...0.8, step: 0.05) {
-                        Text("Açılma gecikmesi")
-                    } minimumValueLabel: { Text("Hızlı") } maximumValueLabel: { Text("Yavaş") }
+                Picker("Çentik açılsın", selection: $settings.openMode) {
+                    ForEach(OpenMode.allCases) { Text($0.title).tag($0) }
                 }
+                .pickerStyle(.segmented)
+                if settings.openMode == .hover {
+                    LabeledContent("Bekleme süresi") {
+                        HStack {
+                            Slider(value: $settings.hoverDelay, in: 0...1.5, step: 0.05)
+                            Text(String(format: "%.2f sn", settings.hoverDelay))
+                                .monospacedDigit()
+                                .frame(width: 60, alignment: .trailing)
+                        }
+                    }
+                    Text("İmleç çentiğin üzerinde bu kadar bekleyince açılır. Tıklamak her zaman anında açar.")
+                        .font(.caption).foregroundStyle(.secondary)
+                } else {
+                    Text("Çentik yalnızca tıklayınca açılır; üzerinden geçmek açmaz.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Toggle("Yaklaşınca büyü (Alcove efekti)", isOn: $settings.proximityEffect)
+                Text("İmleç çentiğe yaklaştıkça çentik yumuşakça kabarır, uzaklaşınca küçülür.")
+                    .font(.caption).foregroundStyle(.secondary)
                 Toggle("Kaydırma hareketleri", isOn: $settings.swipeGestures)
                 Text("İki parmakla yatay kaydır: sonraki/önceki şarkı. Aşağı kaydır: aç, yukarı: kapat.")
                     .font(.caption).foregroundStyle(.secondary)
                 Toggle("Dokunsal geri bildirim", isOn: $settings.hapticsEnabled)
             }
             Section("Ekran") {
-                Toggle("Tüm ekranlarda göster", isOn: $settings.showOnAllDisplays)
-                Text("Kapalıyken yalnızca çentikli (yoksa ana) ekranda görünür. Çentiksiz ekranlarda sanal çentik çizilir.")
+                Picker("Çentik nerede görünsün", selection: $settings.displayMode) {
+                    ForEach(DisplayMode.allCases) { Text($0.title).tag($0) }
+                }
+                Text(displayHint)
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
+    }
+
+    private var displayHint: String {
+        switch settings.displayMode {
+        case .notched: return "MacBook'un çentikli ekranı. Kapak kapalıysa ana ekrana geçer."
+        case .primary: return "Menü çubuğunun olduğu ekran (Sistem Ayarları › Ekranlar › Ana ekran). Çentiksizse sanal çentik çizilir."
+        case .all: return "Her ekranda ayrı çentik. Çentiksiz ekranlarda sanal çentik çizilir."
+        }
     }
 
     private var activities: some View {

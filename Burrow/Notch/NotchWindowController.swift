@@ -102,7 +102,7 @@ final class NotchWindowController: NSObject {
     // MARK: - İsabet alanları (ekran koordinatı)
 
     private var compactRect: CGRect {
-        let size = viewModel.compactSize(for: viewModel.services.activity.current)
+        let size = viewModel.displayedCompactSize(for: viewModel.services.activity.current)
         return viewModel.geometry.topCenteredRect(size: size, padding: Self.hoverPadding)
     }
 
@@ -154,8 +154,19 @@ final class NotchWindowController: NSObject {
         handleHover(location)
     }
 
+    private func updateProximity(_ location: CGPoint) {
+        guard !viewModel.isExpanded, viewModel.services.settings.proximityEffect,
+              screen.frame.insetBy(dx: -1, dy: -1).contains(location) else {
+            viewModel.setProximity(0)
+            return
+        }
+        let rest = viewModel.geometry.topCenteredRect(size: viewModel.compactSize(for: viewModel.services.activity.current))
+        viewModel.setProximity(NotchGeometry.proximity(of: location, to: rest, radius: NotchViewModel.proximityRadius))
+    }
+
     private func handleHover(_ location: CGPoint) {
         refreshDragState()
+        updateProximity(location)
         guard screen.frame.contains(location) || activeRect.contains(location) else {
             cancelHover()
             scheduleCollapseIfNeeded(location)
@@ -173,7 +184,7 @@ final class NotchWindowController: NSObject {
         }
         if compactRect.contains(location) {
             setInteractive(true)
-            guard viewModel.services.settings.hoverToExpand, hoverWork == nil else { return }
+            guard viewModel.services.settings.openMode == .hover, hoverWork == nil else { return }
             let work = DispatchWorkItem { [weak self] in
                 guard let self else { return }
                 self.hoverWork = nil

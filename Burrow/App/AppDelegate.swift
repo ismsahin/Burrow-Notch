@@ -24,7 +24,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
             .sink { [weak self] _ in self?.rebuildWindows() }
             .store(in: &bag)
-        services.settings.$showOnAllDisplays
+        services.settings.$displayMode
             .dropFirst()
             .sink { [weak self] _ in DispatchQueue.main.async { self?.rebuildWindows() } }
             .store(in: &bag)
@@ -51,12 +51,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 case "hud": self.services.activity.show(.hud(kind: .volume(muted: false), value: 0.6))
                 case "charge": self.services.activity.show(.charging(percent: 76, isCharging: true))
                 case "device": self.services.activity.show(.device(name: "AirPods Pro", connected: true))
+                case "peek": self.controllers.values.forEach { $0.viewModel.setProximity(1) }
+                case "half": self.controllers.values.forEach { $0.viewModel.setProximity(0.5) }
+                case "rest": self.controllers.values.forEach { $0.viewModel.setProximity(0) }
                 default: break
                 }
             }
             .store(in: &bag)
     }
     #endif
+
+    /// Menü çubuğu simgesi kalabalık bir çubukta gizlenebilir: uygulamaya tekrar tıklayınca ayarlar açılır.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        openSettings()
+        return true
+    }
 
     func applicationWillTerminate(_ notification: Notification) {
         controllers.values.forEach { $0.close() }
@@ -77,12 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Pencereler
 
     private func rebuildWindows() {
-        let targets: [NSScreen]
-        if services.settings.showOnAllDisplays {
-            targets = NSScreen.screens
-        } else {
-            targets = NSScreen.preferredNotchScreen.map { [$0] } ?? []
-        }
+        let targets = NSScreen.screens(for: services.settings.displayMode)
         let wanted = Dictionary(targets.compactMap { s in s.displayID.map { ($0, s) } }, uniquingKeysWith: { a, _ in a })
 
         for (id, controller) in controllers where wanted[id] == nil {
@@ -133,7 +137,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             window.center()
             settingsWindow = window
         }
-        NSApp.activate(ignoringOtherApps: true)
+        // Menü çubuğu uygulaması (accessory) arka planda kalabildiği için pencereyi zorla öne al.
+        NSApp.activate()
         settingsWindow?.makeKeyAndOrderFront(nil)
+        settingsWindow?.orderFrontRegardless()
     }
 }
