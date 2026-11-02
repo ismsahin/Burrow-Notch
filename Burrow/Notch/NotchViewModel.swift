@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 import Combine
 
 enum NotchTab: String, CaseIterable, Identifiable {
@@ -34,6 +35,8 @@ final class NotchViewModel: ObservableObject {
     @Published private(set) var geometry: NotchGeometry
     @Published private(set) var isExpanded = false
     @Published var tab: NotchTab = .home
+    /// Son sekme geçişinin yönü: true = sağdaki sekmeye (içerik sola kayar), false = soldakine.
+    @Published private(set) var isTabForward = true
     @Published var isDropTargeted = false
     /// İmlecin kapalı çentiğe yakınlığı (0…1). Alcove tarzı "yaklaşınca kabarma" efekti için.
     @Published private(set) var proximity: Double = 0
@@ -59,6 +62,21 @@ final class NotchViewModel: ObservableObject {
         if abs(snapped - proximity) > 0.025 || (snapped == 0) != (proximity == 0) || (snapped == 1) != (proximity == 1) {
             proximity = snapped
         }
+    }
+
+    /// Sekme değiştir: önce yön ayarlanır ki çıkan sekme de doğru yöne kaysın, sonra sekme animasyonla değişir.
+    func select(_ newTab: NotchTab) {
+        guard newTab != tab else { return }
+        isTabForward = Self.isForward(from: tab, to: newTab)
+        DispatchQueue.main.async { [weak self] in
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.86)) { self?.tab = newTab }
+        }
+    }
+
+    /// Saf: üst banttaki sırada sağa mı gidiliyor?
+    nonisolated static func isForward(from old: NotchTab, to new: NotchTab) -> Bool {
+        let order = NotchTab.allCases
+        return (order.firstIndex(of: new) ?? 0) > (order.firstIndex(of: old) ?? 0)
     }
 
     func updateGeometry(_ geometry: NotchGeometry) {

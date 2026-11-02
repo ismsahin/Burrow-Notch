@@ -4,6 +4,10 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/). Sürümler `1.
 
 ## [Yayınlanmamış]
 
+### Düzeltildi (v1.0.11)
+- Sekme geçişi artık yöne göre kayıyor: sağdaki sekmeye geçince içerik sola, soldakine geçince sağa kayar
+  (önceden ana sekme hep soldan, diğerleri hep sağdan geliyordu).
+
 ### Düzeltildi (v1.0.10)
 - Ana ekranda müzik + takvim + anımsatıcılar + ayna birlikteyken içerik çentikten taşıyor, sekmeler ve ayar düğmesi kesiliyordu.
   Yan sütunlar ikisi birlikteyken 118 pt'ye daralıyor, içerik kırpılıyor.

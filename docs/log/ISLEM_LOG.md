@@ -179,3 +179,11 @@ Her oturum sonunda en alta yeni kayıt ekle. **Eski kayıtları silme veya deği
 - Düzeltme: `HomeView.sideColumnWidth` (iki yan sütun varsa 118, tekse 160, müzik yoksa esnek), müzik en az 180 pt;
   `ExpandedNotchView` içeriği `minWidth: 0` + `.clipped()`. Not: `layoutPriority` denendi, takvimi sıfıra ezdiği için bırakıldı.
 - Doğrulama: yeniden başlatıp ilk açılışta ekran görüntüsü (dört parça sığıyor, sekmeler/ayar görünür); testler.
+
+## [014] 2026-11-03 — Yöne göre sekme kaydırma
+- Kullanıcı: sekmeler arası geçişte ekran yöne göre kaymıyor, "dıştan geliyor gibi".
+- Neden: her sekmenin geçişi sabit kenara bağlıydı (ana: .leading, diğerleri: .trailing).
+- Düzeltme: `NotchViewModel.select(_:)` önce `isTabForward`'ı ayarlıyor, sekmeyi bir sonraki turda animasyonla değiştiriyor
+  (çıkan görünüm yeni yönle yeniden çizilsin diye); `ExpandedNotchView.tabTransition` asimetrik move (+opacity).
+  `NotchViewModel.isForward` saf, test edildi. İçerik zaten `.clipped()`, kayma çentik içinde kalıyor.
+- Doğrulama: 112/112 test. Animasyonun gözle kontrolü kullanıcıda (sekme tıklaması otomasyonla yapılamıyor).

@@ -49,7 +49,7 @@ struct ExpandedNotchView: View {
         HStack(spacing: 3) {
             ForEach(visibleTabs) { tab in
                     TabButton(tab: tab, isSelected: viewModel.tab == tab, badge: badge(for: tab)) {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { viewModel.tab = tab }
+                        viewModel.select(tab)
                     }
             }
             Spacer(minLength: viewModel.isIsland ? 16 : viewModel.geometry.notchSize.width + 16)
@@ -83,27 +83,35 @@ struct ExpandedNotchView: View {
         }
     }
 
+    /// Sekmeler yan yana dizili gibi kayar: sağdaki sekmeye geçince yeni içerik sağdan gelir, eskisi sola çıkar; tersi de öyle.
+    private var tabTransition: AnyTransition {
+        let forward = viewModel.isTabForward
+        return .asymmetric(
+            insertion: .move(edge: forward ? .trailing : .leading).combined(with: .opacity),
+            removal: .move(edge: forward ? .leading : .trailing).combined(with: .opacity))
+    }
+
     @ViewBuilder
     private var content: some View {
         switch visibleTabs.contains(viewModel.tab) ? viewModel.tab : .home {
         case .home:
             HomeView(viewModel: viewModel, services: services)
-                .transition(.opacity.combined(with: .move(edge: .leading)))
+                .transition(tabTransition)
         case .shelf:
             ShelfView(store: services.shelf, isTargeted: viewModel.isDropTargeted)
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
+                .transition(tabTransition)
         case .timer:
             TimeToolsView(timer: services.timer, alarms: services.alarms)
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
+                .transition(tabTransition)
         case .clipboard:
             ClipboardView(store: services.clipboard)
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
+                .transition(tabTransition)
         case .reminders:
             RemindersView(service: services.reminders, settings: services.settings)
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
+                .transition(tabTransition)
         case .notifications:
             NotificationsView(service: services.notifications, isEnabled: settings.enableNotifications)
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
+                .transition(tabTransition)
         }
     }
 }

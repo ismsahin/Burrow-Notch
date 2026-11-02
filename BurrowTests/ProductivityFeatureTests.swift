@@ -248,6 +248,13 @@ final class NewSizingTests: XCTestCase {
         XCTAssertLessThan(vm.islandCornerRadius, vm.islandHeight / 2)
     }
 
+    func test_tabDirection_followsHeaderOrder() {
+        XCTAssertTrue(NotchViewModel.isForward(from: .home, to: .clipboard))
+        XCTAssertTrue(NotchViewModel.isForward(from: .clipboard, to: .reminders))
+        XCTAssertFalse(NotchViewModel.isForward(from: .reminders, to: .clipboard))
+        XCTAssertFalse(NotchViewModel.isForward(from: .shelf, to: .home))
+    }
+
     func test_notificationCard_addsHeight() {
         let (vm, clean) = viewModel(island: .large)
         defer { clean() }
