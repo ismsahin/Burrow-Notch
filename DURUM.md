@@ -1,6 +1,6 @@
 # DURUM — Burrow
 
-> Son güncelleme: 2026-11-02 · Güncelleyen: Claude Code (Opus 5.5) · Sürüm: v1.0 (henüz yayınlanmadı)
+> Son güncelleme: 2026-11-03 · Güncelleyen: Claude Code (Opus 5.5) · Sürüm: v1.0.10 (yayında, otomatik güncelleme çalışıyor)
 
 ## Özet
 v1 kodu tamamlandı, derleniyor ve 36/36 birim testi geçiyor. Release derlemesi imzalanıyor ve açılıyor. Kapalı/açık çentik,
@@ -9,6 +9,9 @@ canlı etkinlikler, raf ve ayarlar dahili Retina ekranda **ekran görüntüsüyl
 Depo public, secret'lar kurulu, release hattı uçtan uca yeşil (test → derle → self-signed imza → DMG → EdDSA → appcast).
 
 ## ⏭ Sıradaki adım
+- **Kullanıcının bekleyen fikirleri: `docs/FIKIRLER.md`** (sürükle-bırak → Pano, Kopyala/Kes/AirDrop bölgeleri, ücretli satış/lisans).
+  Kullanıcı "sonra yapacağız" dedi; o isteyince başla.
+- Son durum (v1.0.10): 111/111 test; ada köşe ayarı, anımsatıcı kategorileri, özelleştirilebilir ana ekran, ana ekran taşma düzeltmesi.
 - DMG'yi indirip kur, gerçek kullanımda dene (fare, kaydırma, müzik, raf), geri bildirime göre ince ayar.
 - Kod değişikliği → `git push` → yeni sürüm otomatik. Yalnızca doküman değişikliği sürüm çıkarmaz.
 
