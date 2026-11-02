@@ -17,9 +17,10 @@ struct NotchRootView: View {
     private var size: CGSize { viewModel.currentSize(for: activity.current) }
 
     private var animation: Animation {
+        // Açılış: hafif sekmeli yay (Alcove hissi). Kapanış: sekmesiz, hızlı.
         viewModel.isExpanded
-            ? .spring(response: 0.42, dampingFraction: 0.78)
-            : .spring(response: 0.38, dampingFraction: 0.9)
+            ? .spring(response: 0.46, dampingFraction: 0.74)
+            : .spring(response: 0.36, dampingFraction: 0.92)
     }
 
     /// HUD büyürken hafif "aşma" (overshoot) yay: Alcove'daki esneme hissi.
@@ -62,19 +63,21 @@ struct NotchRootView: View {
                     .padding(.horizontal, horizontalInset + 14)
                     .padding(.top, viewModel.isIsland ? 6 : 0)
                     .transition(.asymmetric(
-                        insertion: .opacity.combined(with: .scale(scale: 0.92, anchor: .top)).animation(.easeOut(duration: 0.25).delay(0.06)),
-                        removal: .opacity.animation(.easeIn(duration: 0.1))
+                        insertion: .blurFade(radius: 10, scale: 0.94).animation(.easeOut(duration: 0.32).delay(0.07)),
+                        removal: .blurFade(radius: 6, scale: 0.98).animation(.easeIn(duration: 0.12))
                     ))
             } else {
                 CompactNotchView(activity: activity.current, viewModel: viewModel, services: services)
                     .padding(.horizontal, horizontalInset)
-                    .transition(.opacity.animation(.easeInOut(duration: 0.15)))
+                    .transition(.blurFade(radius: 4, scale: 1).animation(.easeInOut(duration: 0.18)))
             }
         }
         .frame(width: size.width, height: size.height)
         .clipShape(shape)
         .overlay(outline(shape))
-        .shadow(color: .black.opacity(shadowOpacity), radius: viewModel.isExpanded ? 14 : 8, y: viewModel.isExpanded ? 6 : 3)
+        .shadow(color: .black.opacity(shadowOpacity),
+                radius: viewModel.isExpanded ? 16 : 6 + 8 * viewModel.proximity,
+                y: viewModel.isExpanded ? 6 : 2 + 2 * viewModel.proximity)
         .contentShape(shape)
         .onTapGesture {
             if !viewModel.isExpanded { viewModel.expand() }
@@ -90,9 +93,9 @@ struct NotchRootView: View {
     }
 
     private var shadowOpacity: Double {
-        if viewModel.isExpanded { return 0.45 }
-        // Ada her zaman hafif gölgeli (masaüstünden ayrışsın); çentik yalnızca yaklaşınca.
-        return (viewModel.isIsland ? 0.25 : 0) + 0.35 * viewModel.proximity
+        if viewModel.isExpanded { return 0.5 }
+        // Yaklaşınca etrafında yumuşak siyah hale (Alcove). Ada her zaman hafif gölgeli.
+        return (viewModel.isIsland ? 0.25 : 0) + 0.6 * viewModel.proximity
     }
 
     @ViewBuilder
@@ -102,5 +105,26 @@ struct NotchRootView: View {
         } else if settings.notchOutline {
             shape.stroke(Color.white.opacity(0.16), lineWidth: 1)
         }
+    }
+}
+
+/// Bulanıklıktan netleşerek gelen / bulanıklaşarak giden içerik (akıcı geçişler).
+private struct BlurFadeModifier: ViewModifier {
+    let radius: CGFloat
+    let scale: CGFloat
+    let isActive: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .blur(radius: isActive ? radius : 0)
+            .opacity(isActive ? 0 : 1)
+            .scaleEffect(isActive ? scale : 1, anchor: .top)
+    }
+}
+
+extension AnyTransition {
+    static func blurFade(radius: CGFloat, scale: CGFloat) -> AnyTransition {
+        .modifier(active: BlurFadeModifier(radius: radius, scale: scale, isActive: true),
+                  identity: BlurFadeModifier(radius: radius, scale: scale, isActive: false))
     }
 }

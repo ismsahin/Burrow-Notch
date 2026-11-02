@@ -15,6 +15,10 @@ final class AppServices: ObservableObject {
     let bluetooth = BluetoothMonitor()
     let downloads = DownloadMonitor()
     let timer = TimerService()
+    let alarms = AlarmService()
+    let clipboard = ClipboardStore()
+    let reminders = ReminderService()
+    let notifications = NotificationCenterService()
 
     /// Bağlı Bluetooth cihazlarının pil düzeyleri (ad → pil).
     @Published private(set) var deviceBatteries: [String: DeviceBattery] = [:]
@@ -116,6 +120,36 @@ final class AppServices: ObservableObject {
                 guard let self else { return }
                 self.activity.update(.timer, end.map { .timer(endsAt: $0, total: self.timer.total) })
             }
+            .store(in: &bag)
+
+        alarms.fired
+            .sink { [weak self] alarm in
+                self?.activity.show(.notice(symbol: "alarm.fill", title: alarm.label, detail: alarm.timeText))
+            }
+            .store(in: &bag)
+
+        settings.$enableClipboard
+            .removeDuplicates()
+            .sink { [weak self] enabled in enabled ? self?.clipboard.start() : self?.clipboard.stop() }
+            .store(in: &bag)
+
+        settings.$enableNotifications
+            .removeDuplicates()
+            .sink { [weak self] enabled in enabled ? self?.notifications.start() : self?.notifications.stop() }
+            .store(in: &bag)
+
+        notifications.incoming
+            .sink { [weak self] entry in self?.activity.show(.notification(entry)) }
+            .store(in: &bag)
+
+        notifications.$unread
+            .combineLatest(notifications.$latestAppID)
+            .map { unread, app -> LiveActivity? in
+                guard unread > 0, let app else { return nil }
+                return .notifications(appID: app, count: unread)
+            }
+            .removeDuplicates()
+            .sink { [weak self] in self?.activity.update(.notifications, $0) }
             .store(in: &bag)
 
         timer.finished

@@ -1,6 +1,28 @@
 import SwiftUI
 
-/// "Süre" sekmesi: hazır süreler, çalışan zamanlayıcı, +1 dk / iptal.
+/// "Süre" sekmesi: geri sayım (zamanlayıcı) ve saat alarmları.
+struct TimeToolsView: View {
+    let timer: TimerService
+    let alarms: AlarmService
+    @State private var mode = 0
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Picker("", selection: $mode) {
+                Text("Geri sayım").tag(0)
+                Text("Alarm").tag(1)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .frame(width: 200)
+            .colorScheme(.dark)
+            if mode == 0 { TimerView(timer: timer) } else { AlarmView(service: alarms) }
+        }
+        .frame(maxHeight: .infinity, alignment: .top)
+    }
+}
+
+/// Geri sayım: hazır süreler, çalışan zamanlayıcı, +1 dk / iptal.
 struct TimerView: View {
     @ObservedObject var timer: TimerService
     @State private var customMinutes = 20
@@ -37,7 +59,6 @@ struct TimerView: View {
 
     private var picker: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Zamanlayıcı başlat").font(.system(size: 12, weight: .semibold)).foregroundStyle(.white.opacity(0.7))
             HStack(spacing: 8) {
                 ForEach(TimerService.presets, id: \.self) { minutes in
                     pill("\(minutes) dk") { timer.start(minutes: minutes) }

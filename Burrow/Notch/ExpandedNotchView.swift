@@ -10,6 +10,7 @@ struct ExpandedNotchView: View {
     @ObservedObject var settings: AppSettings
     @ObservedObject var media: MediaController
     @ObservedObject var shelf: ShelfStore
+    @ObservedObject var notificationService: NotificationCenterService
     let services: AppServices
 
     init(viewModel: NotchViewModel, services: AppServices) {
@@ -18,6 +19,7 @@ struct ExpandedNotchView: View {
         settings = services.settings
         media = services.media
         shelf = services.shelf
+        notificationService = services.notifications
     }
 
     var body: some View {
@@ -43,9 +45,9 @@ struct ExpandedNotchView: View {
     }
 
     private var header: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 3) {
             ForEach(visibleTabs) { tab in
-                    TabButton(tab: tab, isSelected: viewModel.tab == tab, badge: tab == .shelf ? shelf.items.count : 0) {
+                    TabButton(tab: tab, isSelected: viewModel.tab == tab, badge: badge(for: tab)) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { viewModel.tab = tab }
                     }
             }
@@ -61,7 +63,23 @@ struct ExpandedNotchView: View {
     }
 
     private var visibleTabs: [NotchTab] {
-        NotchTab.allCases.filter { $0 != .shelf || settings.enableShelf }
+        NotchTab.allCases.filter { tab in
+            switch tab {
+            case .home, .timer: return true
+            case .shelf: return settings.enableShelf
+            case .clipboard: return settings.enableClipboard
+            case .reminders: return settings.enableReminders
+            case .notifications: return settings.enableNotifications
+            }
+        }
+    }
+
+    private func badge(for tab: NotchTab) -> Int {
+        switch tab {
+        case .shelf: return shelf.items.count
+        case .notifications: return services.notifications.unread
+        default: return 0
+        }
     }
 
     @ViewBuilder
@@ -74,7 +92,16 @@ struct ExpandedNotchView: View {
             ShelfView(store: services.shelf, isTargeted: viewModel.isDropTargeted)
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
         case .timer:
-            TimerView(timer: services.timer)
+            TimeToolsView(timer: services.timer, alarms: services.alarms)
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
+        case .clipboard:
+            ClipboardView(store: services.clipboard)
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
+        case .reminders:
+            RemindersView(service: services.reminders)
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
+        case .notifications:
+            NotificationsView(service: services.notifications, isEnabled: settings.enableNotifications)
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
         }
     }
@@ -88,23 +115,25 @@ private struct TabButton: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 4) {
-                Image(systemName: tab.symbol).font(.system(size: 11, weight: .semibold))
-                Text(tab.title).font(.system(size: 11, weight: .semibold))
-                if badge > 0 {
-                    Text("\(badge)")
-                        .font(.system(size: 9, weight: .bold).monospacedDigit())
-                        .padding(.horizontal, 4)
-                        .background(Capsule().fill(Color.white.opacity(0.25)))
+            // Altı sekme çentiğin solundaki dar alana sığsın diye yalnızca simge; adı ipucunda.
+            Image(systemName: tab.symbol)
+                .font(.system(size: 11, weight: .semibold))
+                .frame(width: 26, height: 22)
+                .background(Capsule().fill(Color.white.opacity(isSelected ? 0.18 : 0)))
+                .foregroundStyle(.white.opacity(isSelected ? 1 : 0.5))
+                .overlay(alignment: .topTrailing) {
+                    if badge > 0 {
+                        Text(badge > 99 ? "99+" : "\(badge)")
+                            .font(.system(size: 7.5, weight: .bold).monospacedDigit())
+                            .padding(.horizontal, 3)
+                            .background(Capsule().fill(tab == .notifications ? Color.red : Color.white.opacity(0.3)))
+                            .offset(x: 3, y: -2)
+                    }
                 }
-            }
-            .padding(.horizontal, 9)
-            .padding(.vertical, 4)
-            .background(Capsule().fill(Color.white.opacity(isSelected ? 0.18 : 0)))
-            .foregroundStyle(.white.opacity(isSelected ? 1 : 0.55))
-            .contentShape(Capsule())
+                .contentShape(Capsule())
         }
         .buttonStyle(.plain)
+        .help(tab.title)
     }
 }
 

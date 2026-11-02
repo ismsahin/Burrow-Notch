@@ -11,7 +11,7 @@ struct NotchGeometry: Equatable {
 
     static let fallbackNotchWidth: CGFloat = 185
     static let fallbackNotchHeight: CGFloat = 32
-    static let expandedSize = CGSize(width: 620, height: 180)
+    static let expandedSize = CGSize(width: 620, height: 196)
     /// Pencere, en büyük içerik + gölge payı kadar sabit boyutludur.
     static let windowSize = CGSize(width: 760, height: 300)
 

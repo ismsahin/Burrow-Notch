@@ -39,6 +39,16 @@ enum NotchlessStyle: String, CaseIterable, Identifiable {
     var title: String { self == .notch ? "Sanal çentik" : "Dynamic Island (hap)" }
 }
 
+/// Ada (hap) boyutu.
+enum IslandSize: String, CaseIterable, Identifiable {
+    /// Menü çubuğunun içine sığan ince hap.
+    case compact
+    /// Daha iri, menü çubuğunun biraz altına sarkan hap (iPhone Dynamic Island hissi).
+    case large
+    var id: String { rawValue }
+    var title: String { self == .compact ? "Küçük (menü çubuğunda)" : "Büyük" }
+}
+
 /// Ses/parlaklık göstergesinin biçimi.
 enum HUDStyle: String, CaseIterable, Identifiable {
     /// Çentiğin iki yanında ince çubuk.
@@ -81,6 +91,10 @@ final class AppSettings: ObservableObject {
         static let showCalendarActivity = "showCalendarActivity"
         static let calendarLeadMinutes = "calendarLeadMinutes"
         static let showDeviceBattery = "showDeviceBattery"
+        static let islandSize = "islandSize"
+        static let enableClipboard = "enableClipboard"
+        static let enableNotifications = "enableNotifications"
+        static let enableReminders = "enableReminders"
     }
 
     private let defaults: UserDefaults
@@ -112,6 +126,11 @@ final class AppSettings: ObservableObject {
     @Published var showCalendarActivity: Bool { didSet { defaults.set(showCalendarActivity, forKey: Key.showCalendarActivity) } }
     @Published var calendarLeadMinutes: Int { didSet { defaults.set(calendarLeadMinutes, forKey: Key.calendarLeadMinutes) } }
     @Published var showDeviceBattery: Bool { didSet { defaults.set(showDeviceBattery, forKey: Key.showDeviceBattery) } }
+    @Published var islandSize: IslandSize { didSet { defaults.set(islandSize.rawValue, forKey: Key.islandSize) } }
+    @Published var enableClipboard: Bool { didSet { defaults.set(enableClipboard, forKey: Key.enableClipboard) } }
+    /// Tam Disk Erişimi gerektirir; izin yoksa sekmede yönlendirme gösterilir.
+    @Published var enableNotifications: Bool { didSet { defaults.set(enableNotifications, forKey: Key.enableNotifications) } }
+    @Published var enableReminders: Bool { didSet { defaults.set(enableReminders, forKey: Key.enableReminders) } }
 
     static let defaultValues: [String: Any] = [
         Key.proximityEffect: true,
@@ -136,6 +155,10 @@ final class AppSettings: ObservableObject {
         Key.showCalendarActivity: true,
         Key.calendarLeadMinutes: 15,
         Key.showDeviceBattery: true,
+        Key.islandSize: IslandSize.large.rawValue,
+        Key.enableClipboard: true,
+        Key.enableNotifications: true,
+        Key.enableReminders: true,
     ]
 
     init(defaults: UserDefaults = .standard) {
@@ -165,6 +188,10 @@ final class AppSettings: ObservableObject {
         showCalendarActivity = defaults.bool(forKey: Key.showCalendarActivity)
         calendarLeadMinutes = min(60, max(5, defaults.integer(forKey: Key.calendarLeadMinutes)))
         showDeviceBattery = defaults.bool(forKey: Key.showDeviceBattery)
+        islandSize = IslandSize(rawValue: defaults.string(forKey: Key.islandSize) ?? "") ?? .large
+        enableClipboard = defaults.bool(forKey: Key.enableClipboard)
+        enableNotifications = defaults.bool(forKey: Key.enableNotifications)
+        enableReminders = defaults.bool(forKey: Key.enableReminders)
     }
 
     /// v1.0.3'teki "Üzerine gelince aç" anahtarı kapalıysa tıklama moduna taşınır.

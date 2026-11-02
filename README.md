@@ -47,6 +47,10 @@ Betik son sürümü indirir, **SHA-256**, **kod imzası** ve **sabitlenmiş sert
 | 👆 | **Kaydırma hareketleri** | Açık çentikte yatay → şarkı değiştir. Aşağı kaydır → aç, yukarı → kapat. |
 | 🔊 | **Yeni HUD** | macOS'un ortadaki ses/parlaklık göstergesi yerine çentikte zarif bir çubuk (isteğe bağlı). |
 | 📅 | **Takvim** | Bugün ve yarının yaklaşan etkinlikleri. |
+| 🔔 | **Bildirimler** | Tüm uygulama bildirimleri önce büyük kart, sonra çentikte simge + sayı (Tam Disk Erişimi ile). |
+| 📋 | **Pano geçmişi** | Yazı / bağlantı / medya kategorileri, yıldızla, filtrele, ara; tıkla → tekrar kopyala. |
+| ⏰ | **Alarm ve geri sayım** | Saat alarmları (bir kez / her gün) ve zamanlayıcı. |
+| ✅ | **Anımsatıcılar** | Tamamlanmamış anımsatıcılar; tıkla → tamamlandı. |
 | 🗂 | **Dosya rafı** | Dosyayı çentiğe sürükle-bırak, sonra istediğin yere sürükle. AirDrop ile tek tıkla paylaş. |
 | 🪞 | **Kamera aynası** | Görüntülü görüşme öncesi hızlı kontrol. Çentik kapanınca kamera kapanır. |
 | 🔋 | **Pil** | Açık çentikte yüzde ve durum. |
@@ -64,6 +68,8 @@ Her izin yalnızca ilgili özellik kullanıldığında istenir ve her özellik a
 | Kamera | Ayna (yalnızca sen açınca) |
 | Bluetooth | Cihaz bağlandı bildirimi |
 | Erişilebilirlik | *Sadece* "Sistem HUD'unu değiştir" açıksa ses/parlaklık tuşlarını yakalamak için (varsayılan kapalı) |
+| Anımsatıcılar | Anımsatıcılar sekmesini ilk açtığında |
+| Tam Disk Erişimi | *Sadece* bildirimleri çentikte görmek istersen; Bildirim Merkezi veritabanı salt okunur okunur, hiçbir yere gönderilmez |
 
 ## Güvenlik
 

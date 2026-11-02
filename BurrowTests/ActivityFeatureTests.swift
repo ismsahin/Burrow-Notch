@@ -251,6 +251,7 @@ final class NotchSizingTests: XCTestCase {
         let defaults = UserDefaults(suiteName: suite)!
         let settings = AppSettings(defaults: defaults)
         settings.notchlessStyle = style
+        settings.islandSize = .compact
         settings.hudStyle = hud
         let geometry = NotchGeometry.make(screenFrame: CGRect(x: 0, y: 0, width: 1512, height: 982),
                                           safeAreaTop: notch ? 38 : 0, leftAuxWidth: notch ? 662 : nil,

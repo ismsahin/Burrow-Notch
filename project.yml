@@ -43,6 +43,8 @@ targets:
         NSAppleEventsUsageDescription: "Burrow, çalan şarkıyı göstermek ve kontrol etmek için Müzik ve Spotify ile konuşur."
         NSCalendarsFullAccessUsageDescription: "Burrow, yaklaşan etkinliklerini çentikte göstermek için takvimini okur."
         NSCalendarsUsageDescription: "Burrow, yaklaşan etkinliklerini çentikte göstermek için takvimini okur."
+        NSRemindersFullAccessUsageDescription: "Burrow, tamamlanmamış anımsatıcılarını çentikte gösterir ve işaretlemeni sağlar."
+        NSRemindersUsageDescription: "Burrow, tamamlanmamış anımsatıcılarını çentikte gösterir ve işaretlemeni sağlar."
         NSCameraUsageDescription: "Burrow, ayna özelliği için kamerayı yalnızca sen açtığında kullanır."
         NSBluetoothAlwaysUsageDescription: "Burrow, kulaklık gibi cihazlar bağlandığında çentikte bildirim gösterir."
         SUFeedURL: $(BURROW_FEED_URL)

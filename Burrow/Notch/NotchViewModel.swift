@@ -2,14 +2,17 @@ import AppKit
 import Combine
 
 enum NotchTab: String, CaseIterable, Identifiable {
-    case home, shelf, timer
+    case home, shelf, clipboard, timer, reminders, notifications
     var id: String { rawValue }
 
     var title: String {
         switch self {
         case .home: return "Ana"
         case .shelf: return "Raf"
+        case .clipboard: return "Pano"
         case .timer: return "Süre"
+        case .reminders: return "Anımsatıcılar"
+        case .notifications: return "Bildirimler"
         }
     }
 
@@ -17,7 +20,10 @@ enum NotchTab: String, CaseIterable, Identifiable {
         switch self {
         case .home: return "house.fill"
         case .shelf: return "tray.full.fill"
+        case .clipboard: return "doc.on.clipboard.fill"
         case .timer: return "timer"
+        case .reminders: return "checklist"
+        case .notifications: return "bell.fill"
         }
     }
 }
@@ -66,10 +72,20 @@ final class NotchViewModel: ObservableObject {
 
     /// Çentiksiz ekranda "hap" biçimi seçiliyse true.
     var isIsland: Bool { !geometry.hasPhysicalNotch && services.settings.notchlessStyle == .island }
-    /// Ada menü çubuğunun içinde dikey ortalı yüzer (altındaki pencerelerin üstüne taşmaz).
-    var topInset: CGFloat { isIsland ? max(2, (geometry.notchSize.height - islandHeight) / 2) : 0 }
-    /// Menü çubuğundan biraz kısa hap.
-    var islandHeight: CGFloat { max(Self.minIslandHeight, geometry.notchSize.height - Self.islandMenuBarMargin) }
+    /// Küçük ada: menü çubuğunun içinde dikey ortalı. Büyük ada: daha iri, menü çubuğunun biraz altına sarkan hap.
+    var topInset: CGFloat {
+        guard isIsland else { return 0 }
+        if services.settings.islandSize == .large { return Self.largeIslandTopInset }
+        return max(2, (geometry.notchSize.height - islandHeight) / 2)
+    }
+    var islandHeight: CGFloat {
+        if services.settings.islandSize == .large { return Self.largeIslandHeight }
+        return max(Self.minIslandHeight, geometry.notchSize.height - Self.islandMenuBarMargin)
+    }
+    static let largeIslandHeight: CGFloat = 32
+    static let largeIslandTopInset: CGFloat = 6
+    /// Gelen bildirim kartında çentiğin altına eklenen yükseklik.
+    static let notificationCardHeight: CGFloat = 46
     static let minIslandHeight: CGFloat = 18
     static let islandMenuBarMargin: CGFloat = 5
     /// Adanın ortası (kamera yok, daha dar): boşken küçük bir hap.
@@ -87,14 +103,20 @@ final class NotchViewModel: ObservableObject {
         return false
     }
 
+    /// Çentiğin altına uzayan ek satırın yüksekliği (büyük HUD / bildirim kartı).
+    func dropDownHeight(for activity: LiveActivity) -> CGFloat {
+        if isLargeHUD(activity) { return Self.largeHUDExtraHeight }
+        if case .notification = activity { return Self.notificationCardHeight }
+        return 0
+    }
+
     /// Kapalı hâlde dinlenme boyutu (çentik + canlı etkinlik payı + şekil kıvrımları). İsabet alanı bundan hesaplanır.
     func compactSize(for activity: LiveActivity) -> CGSize {
-        let large = isLargeHUD(activity)
-        let extra = large ? 120 : activity.extraWidth
+        let extra = isLargeHUD(activity) ? 120 : activity.extraWidth
         let sidePadding = isIsland ? islandHeight * 0.5 : Self.topRadius * 2
         return CGSize(
             width: centerWidth + extra + sidePadding,
-            height: barHeight + (large ? Self.largeHUDExtraHeight : 0)
+            height: barHeight + dropDownHeight(for: activity)
         )
     }
 
@@ -130,10 +152,12 @@ final class NotchViewModel: ObservableObject {
         proximity = 0
         isExpanded = true
         if services.settings.hapticsEnabled {
-            NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+            // Force Touch trackpad'de hissedilir (parmak trackpad üzerindeyken).
+            NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
         }
         services.calendar.reload()
         services.shelf.prune()
+        services.notifications.markAllRead()
     }
 
     func collapse() {

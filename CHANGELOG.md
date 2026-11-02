@@ -4,6 +4,20 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/). Sürümler `1.
 
 ## [Yayınlanmamış]
 
+### Eklendi (v1.0.6)
+- **Bildirimler** (Tam Disk Erişimi ile): yeni bildirim önce büyük kart, sonra kapalı çentikte uygulama simgesi +
+  okunmamış sayısı; "Bildirimler" sekmesinde son bildirimler, tıkla → uygulamayı aç.
+- **Pano geçmişi**: Yazı / Bağlantı / Medya kategorileri, yıldızlama, yıldızlı filtresi, arama, tıkla → tekrar kopyala.
+  Parola yöneticilerinin kopyaladıkları kaydedilmez.
+- **Alarm**: saat alarmları (bir kez / her gün), Süre sekmesinde "Geri sayım | Alarm".
+- **Anımsatıcılar** sekmesi: tamamlanmamışlar, tarih/gecikme, tıkla → tamamlandı.
+- **Büyük ayna**: aynaya basınca takvimin yerini kaplar (müzik yarıda, ayna yarıda), ✕ ile küçülür.
+- **Ada boyutu**: Küçük (menü çubuğunda) / Büyük.
+- Sekmeler simgeye dönüştü (altı sekme), bildirim sekmesinde kırmızı sayaç.
+
+### Değişti (v1.0.6)
+- Yaklaşınca daha belirgin siyah hale, bulanıklıktan netleşen açılış, daha yaylı açılış, açılışta daha belirgin titreşim.
+
 ### Eklendi (v1.0.5)
 - **Çoklu canlı etkinlik**: müzik, indirme, yaklaşan takvim etkinliği ve zamanlayıcı aynı anda; kapalı çentikte iki
   parmakla sağa/sola (fare tekerleğiyle yukarı/aşağı) kaydırarak geçiş, sayfa noktaları.

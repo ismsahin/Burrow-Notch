@@ -12,6 +12,10 @@ enum LiveActivity: Equatable {
     case download(name: String, progress: Double, count: Int)
     case calendar(title: String, startsAt: Date)
     case timer(endsAt: Date, total: TimeInterval)
+    /// Okunmamış bildirimler: son uygulamanın simgesi + sayı (kalıcı, çentik açılınca sıfırlanır).
+    case notifications(appID: String, count: Int)
+    /// Yeni gelen bildirim: önce büyük kart (geçici).
+    case notification(NotificationEntry)
     case charging(percent: Int, isCharging: Bool)
     case lowBattery(percent: Int)
     case hud(kind: HUDKind, value: Double)
@@ -25,6 +29,7 @@ enum LiveActivity: Equatable {
         case .download: return .download
         case .calendar: return .calendar
         case .timer: return .timer
+        case .notifications: return .notifications
         default: return nil
         }
     }
@@ -35,7 +40,8 @@ enum LiveActivity: Equatable {
     var priority: Int {
         switch self {
         case .none: return 0
-        case .media, .download, .calendar, .timer: return 10
+        case .media, .download, .calendar, .timer, .notifications: return 10
+        case .notification: return 45
         case .device: return 30
         case .notice: return 35
         case .charging: return 40
@@ -47,7 +53,8 @@ enum LiveActivity: Equatable {
     /// Geçici etkinliğin ekranda kalma süresi (sn). Kalıcılar için nil.
     var displayDuration: TimeInterval? {
         switch self {
-        case .none, .media, .download, .calendar, .timer: return nil
+        case .none, .media, .download, .calendar, .timer, .notifications: return nil
+        case .notification: return 4.5
         case .hud: return 1.6
         case .charging: return 3
         case .lowBattery: return 5
@@ -64,6 +71,8 @@ enum LiveActivity: Equatable {
         case .download: return 150
         case .calendar: return 210
         case .timer: return 130
+        case .notifications: return 96
+        case .notification: return 300
         case .hud: return 170
         case .charging, .lowBattery: return 110
         case .device(_, _, let battery): return battery == nil ? 200 : 300
@@ -74,6 +83,7 @@ enum LiveActivity: Equatable {
     func isSameKind(as other: LiveActivity) -> Bool {
         switch (self, other) {
         case (.none, .none), (.media, .media), (.download, .download), (.calendar, .calendar), (.timer, .timer),
+             (.notifications, .notifications), (.notification, .notification),
              (.charging, .charging), (.lowBattery, .lowBattery), (.device, .device), (.notice, .notice):
             return true
         case let (.hud(a, _), .hud(b, _)):
@@ -94,7 +104,7 @@ enum HUDKind: Equatable {
 
 /// Kalıcı etkinlik türleri. Sıra, "Otomatik" modda eşitlik bozucudur.
 enum ActivityKind: String, CaseIterable, Identifiable, Codable {
-    case media, download, calendar, timer
+    case media, download, calendar, timer, notifications
     var id: String { rawValue }
 
     var title: String {
@@ -103,6 +113,7 @@ enum ActivityKind: String, CaseIterable, Identifiable, Codable {
         case .download: return "İndirmeler"
         case .calendar: return "Yaklaşan etkinlik"
         case .timer: return "Zamanlayıcı"
+        case .notifications: return "Bildirimler"
         }
     }
 }

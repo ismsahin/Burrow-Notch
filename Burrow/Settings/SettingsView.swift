@@ -65,6 +65,12 @@ struct SettingsView: View {
                      ? "Harici monitör gibi çentiksiz ekranlarda menü çubuğunun hemen altında yüzen yuvarlak hap (iPhone Dynamic Island)."
                      : "Çentiksiz ekranlarda menü çubuğuna yapışık sanal çentik çizilir.")
                     .font(.caption).foregroundStyle(.secondary)
+                if settings.notchlessStyle == .island {
+                    Picker("Ada boyutu", selection: $settings.islandSize) {
+                        ForEach(IslandSize.allCases) { Text($0.title).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                }
                 Toggle("Çentik dış çizgisi", isOn: $settings.notchOutline)
             }
         }
@@ -105,7 +111,17 @@ struct SettingsView: View {
                 Text("Aynı anda örneğin müzik çalıp bir şey iniyorsa kapalı çentikte bu gösterilir. Çentiğin üzerindeyken iki parmakla sağa/sola kaydırarak (fare tekerleğiyle yukarı/aşağı) diğerlerine geçebilirsin; sağ alttaki noktalar kaç etkinlik olduğunu gösterir.")
                     .font(.caption).foregroundStyle(.secondary)
             }
+            Section("Bildirimler") {
+                Toggle("Uygulama bildirimlerini çentikte göster", isOn: $settings.enableNotifications)
+                Text("Yeni bildirim önce büyük kart olarak açılır, sonra kapalı çentikte uygulama simgesi ve okunmamış sayısı kalır. macOS bunun için **Tam Disk Erişimi** ister: Burrow bildirim veritabanını yalnızca okur, hiçbir yere göndermez.")
+                    .font(.caption).foregroundStyle(.secondary)
+                if settings.enableNotifications {
+                    NotificationAccessRow(service: services.notifications)
+                }
+            }
             Section("Açık Çentik") {
+                Toggle("Pano geçmişi", isOn: $settings.enableClipboard)
+                Toggle("Anımsatıcılar", isOn: $settings.enableReminders)
                 Toggle("Takvim", isOn: $settings.showCalendar)
                 Toggle("Kamera aynası", isOn: $settings.enableMirror)
                 Toggle("Dosya rafı", isOn: $settings.enableShelf)
@@ -197,4 +213,33 @@ struct SettingsView: View {
 extension Bundle {
     var shortVersion: String { object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?" }
     var buildNumber: String { object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?" }
+}
+
+/// Tam Disk Erişimi durumu (servisi doğrudan izler, izin verilince kendiliğinden yeşile döner).
+private struct NotificationAccessRow: View {
+    @ObservedObject var service: NotificationCenterService
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                switch service.status {
+                case .active:
+                    Label("Etkin", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+                case .needsAccess:
+                    Label("Tam Disk Erişimi gerekiyor", systemImage: "exclamationmark.triangle.fill").foregroundStyle(.yellow)
+                case .off:
+                    Label("Kapalı", systemImage: "circle")
+                }
+                Spacer()
+                if service.status != .active {
+                    Button("Tam Disk Erişimi Ver…") { NotificationCenterService.openFullDiskAccessSettings() }
+                }
+            }
+            .font(.callout)
+            if service.status == .needsAccess {
+                Text("Açılan listede **+** düğmesine bas → Uygulamalar › Burrow'u seç → anahtarı aç. Burrow birkaç saniye içinde kendiliğinden algılar.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+    }
 }

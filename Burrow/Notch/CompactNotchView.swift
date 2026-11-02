@@ -39,6 +39,12 @@ struct CompactNotchView: View {
                     .padding(.horizontal, 14)
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
+            if case .notification(let entry) = activity {
+                NotificationRow(entry: entry, compact: true)
+                    .frame(height: NotchViewModel.notificationCardHeight, alignment: .top)
+                    .padding(.horizontal, 14)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
         .foregroundStyle(.white)
         .clipped()
@@ -71,6 +77,13 @@ struct CompactNotchView: View {
             }
         case .timer:
             Image(systemName: "timer").font(.system(size: 13, weight: .semibold)).foregroundStyle(.orange)
+        case .notifications(let appID, _):
+            AppIcon(bundleID: appID, size: min(20, viewModel.barHeight - 6))
+        case .notification(let entry):
+            HStack(spacing: 6) {
+                AppIcon(bundleID: entry.appID, size: min(18, viewModel.barHeight - 8))
+                Text(AppIconCache.name(for: entry.appID)).font(.system(size: 11, weight: .semibold)).lineLimit(1)
+            }
         case .charging(_, let isCharging):
             Image(systemName: isCharging ? "bolt.fill" : "powerplug")
                 .font(.system(size: 13, weight: .semibold))
@@ -161,6 +174,13 @@ struct CompactNotchView: View {
             }
         case .notice(_, _, let detail):
             Text(detail).font(.system(size: 11, weight: .medium)).foregroundStyle(.white.opacity(0.7)).lineLimit(1)
+        case .notifications(_, let count):
+            Text("\(count)")
+                .font(.system(size: 11, weight: .bold).monospacedDigit())
+                .padding(.horizontal, 6).padding(.vertical, 1)
+                .background(Capsule().fill(Color.red))
+        case .notification:
+            Image(systemName: "bell.badge.fill").font(.system(size: 11)).foregroundStyle(.red, .white.opacity(0.8))
         }
     }
 }

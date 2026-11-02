@@ -113,3 +113,25 @@ Her oturum sonunda en alta yeni kayıt ekle. **Eski kayıtları silme veya deği
   4. Zamanlayıcı Mac uykudayken duruyordu (monoton saat) → `wallDeadline`.
   5. Tercihi "Otomatik"e çevirmek ekranı zıplatıyordu → mevcut/elle seçim korunuyor.
   6. "+1 dk" zamanlayıcıyı bitip yeniden başlamış gibi gösteriyordu → `endsAt` hiç nil olmadan uzatılıyor.
+
+## [008] 2026-11-02 — Bildirimler, pano, alarm, anımsatıcılar, büyük ayna, akıcılık
+- Yapan: Claude Code (Opus 5.5)
+- İstek: YouTube/tarayıcı müziği; kopyalama geçmişi (kategori, yıldız, filtre); geri sayım + alarm; anımsatıcılar;
+  aynaya basınca büyüsün; Alcove gibi yaklaşma/gölge/titreşim; Tam Disk Erişimiyle tüm bildirimler (büyük → küçük + sayı);
+  ada için "büyük" seçeneği (eski, daha iri ve biraz aşağıda).
+- Yapılanlar: `ClipboardStore/Item/View`, `AlarmService/View` + `TimeToolsView`, `ReminderService/View`,
+  `NotificationReader` (SQLite salt okunur) + `NotificationCenterService` + `NotificationsView`, `.notification` /
+  `.notifications` etkinlikleri, simge sekmeler, büyük ayna, `IslandSize`, `blurFade` geçişi, hale gölgesi,
+  `.levelChange` titreşim. Açık çentik 180 → 196 pt (alarm formu sığsın). Karar 0009.
+- **Tarayıcı medyası yapılmadı:** mediaremote-adapter'ı (BSD-3) Vendor'a alıp derleyip çalıştırma adımı Claude Code'un
+  otomatik güvenlik denetimince durduruldu ("Code from External"). Kullanıcı onayı bekleniyor; hiçbir dosya eklenmedi.
+- Doğrulama: 98/98 test (bildirim okuyucu macOS şemasıyla geçici SQLite'ta test edildi). Ekran görüntüleri: bildirim kartı,
+  kırmızı sayaç, Pano, Süre, Anımsatıcılar ve Bildirimler sekmeleri.
+- Doğrulanmayan: gerçek bildirim veritabanı (Tam Disk Erişimi kullanıcı verince), büyük ayna (kamera izni), alarm
+  formunun yerleşimi (segment tıklanamadı), gerçek trackpad titreşimi.
+- Not: Test için panoya iki metin kopyalandı (kullanıcının panosundaki son öğenin yerine geçti); geçmiş dosyasından silindi.
+- Kod incelemesi (code-reviewer): kritik/yüksek yok; 8 bulgu düzeltildi:
+  pano küçük resimleri önbellekli (üzerine gelince takılma yok), resim çözme/yazma arka planda, metin resimden önce
+  (Office önizlemesi), yıldızlılar dahil 500 sınırı; alarm uyanışta kaçırılmıyor (wake observer kaldırıldı, saat değişimi
+  izleniyor), çalmayı durdurma bekleyen tekrarları iptal ediyor; bildirimler kapatılınca sayaç temizleniyor, durdurma
+  sonrası geç sonuç yok sayılıyor, 50'den fazla yığın sonraki turda okunuyor, geçici SQLite kilidi "izin yok" göstermiyor.

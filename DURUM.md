@@ -22,6 +22,9 @@ Depo public, secret'lar kurulu, release hattı uçtan uca yeşil (test → derle
 - [x] Ayarlar penceresi (5 sekme), menü çubuğu simgesi, girişte başlat
 - [x] Sparkle 2 + release.yml (test → derle → imzala → EdDSA → appcast → Release)
 - [x] install.sh (SHA-256 + codesign + sabitlenmiş sertifika parmak izi)
+- [x] v1.0.6: bildirimler (Tam Disk Erişimi), pano geçmişi, alarm, anımsatıcılar, büyük ayna, ada boyutu,
+      akıcılık ayarları (karar 0009)
+- [ ] Tarayıcı medyası (YouTube vb.): mediaremote-adapter — kullanıcı onayı bekliyor (karar 0009)
 - [x] v1.0.5: çoklu etkinlik + kaydırarak geçiş, öncelik seçimi, indirme, takvim geri sayımı, kulaklık pili,
       zamanlayıcı, ada (hap) biçimi, büyük HUD, dış çizgi (karar 0008)
 - [x] v1.0.4: yaklaşınca büyü efekti, açılma biçimi (bekleme/tıklama + süre), ekran seçimi (çentikli/ana/tümü)

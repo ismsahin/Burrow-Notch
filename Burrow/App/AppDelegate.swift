@@ -60,6 +60,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 case "timer": self.services.timer.start(minutes: 25)
                 case "cal": self.services.activity.update(.calendar, .calendar(title: "Ekip toplantısı", startsAt: Date().addingTimeInterval(12 * 60)))
                 case "done": self.services.activity.show(.notice(symbol: "checkmark.circle.fill", title: "İndirildi", detail: "macOS.dmg"))
+                case "notify":
+                    let entry = NotificationEntry(id: 1, appID: "com.apple.MobileSMS", title: "Ayşe",
+                                                  subtitle: "", body: "Akşam 8'de buluşalım mı? 🙂", date: Date())
+                    self.services.activity.show(.notification(entry))
+                    self.services.activity.update(.notifications, .notifications(appID: "com.apple.MobileSMS", count: 3))
+                case let tab where tab.hasPrefix("tab-"):
+                    if let notchTab = NotchTab(rawValue: String(tab.dropFirst(4))) {
+                        self.controllers.values.forEach { $0.expand(tab: notchTab) }
+                    }
                 case "clear":
                     ActivityKind.allCases.forEach { self.services.activity.update($0, nil) }
                     self.services.timer.cancel()

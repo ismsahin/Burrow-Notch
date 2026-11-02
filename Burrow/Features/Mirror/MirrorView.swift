@@ -1,33 +1,49 @@
 import SwiftUI
 
-/// Dokununca açılan küçük kamera aynası.
+/// Kamera aynası. Küçükken dokun → açılır ve büyür; büyükken ✕ → kapanır, küçük hâline döner.
 struct MirrorView: View {
     @ObservedObject var mirror: CameraMirror
+    let isLarge: Bool
+
+    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: isLarge ? 20 : 16, style: .continuous) }
 
     var body: some View {
-        Button { mirror.toggle() } label: {
-            ZStack {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.white.opacity(0.08))
-                switch mirror.state {
-                case .running:
-                    CameraPreview(session: mirror.session)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                case .starting:
-                    ProgressView().controlSize(.small)
-                case .denied:
-                    label(symbol: "video.slash.fill", text: "İzin yok")
-                case .unavailable:
-                    label(symbol: "video.slash", text: "Kamera yok")
-                case .off:
-                    label(symbol: "person.crop.square", text: "Ayna")
+        ZStack(alignment: .topTrailing) {
+            Button { if !isLarge { mirror.start() } } label: {
+                ZStack {
+                    shape.fill(Color.white.opacity(0.08))
+                    switch mirror.state {
+                    case .running:
+                        CameraPreview(session: mirror.session).clipShape(shape)
+                    case .starting:
+                        ProgressView().controlSize(.small)
+                    case .denied:
+                        label(symbol: "video.slash.fill", text: "İzin yok")
+                    case .unavailable:
+                        label(symbol: "video.slash", text: "Kamera yok")
+                    case .off:
+                        label(symbol: "person.crop.square", text: "Ayna")
+                    }
                 }
+                .frame(width: isLarge ? nil : 84, height: isLarge ? nil : 84)
+                .contentShape(shape)
             }
-            .frame(width: 84, height: 84)
-            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .buttonStyle(.plain)
+            .help(isLarge ? "" : "Kamera aynası")
+
+            if isLarge {
+                Button { mirror.stop() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .bold))
+                        .frame(width: 22, height: 22)
+                        .background(Circle().fill(.ultraThinMaterial))
+                        .foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
+                .padding(8)
+                .help("Aynayı kapat")
+            }
         }
-        .buttonStyle(.plain)
-        .help("Kamera aynası")
     }
 
     private func label(symbol: String, text: String) -> some View {
