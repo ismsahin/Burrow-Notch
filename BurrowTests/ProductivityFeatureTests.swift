@@ -216,6 +216,18 @@ final class NewSizingTests: XCTestCase {
         XCTAssertEqual(large.islandHeight, NotchViewModel.largeIslandHeight)
     }
 
+    func test_largeIsland_isWiderWithNotchLikeCorners() {
+        let (small, c1) = viewModel(island: .compact)
+        defer { c1() }
+        let (large, c2) = viewModel(island: .large)
+        defer { c2() }
+        XCTAssertTrue(large.isLargeIsland)
+        XCTAssertFalse(small.isLargeIsland)
+        XCTAssertEqual(large.centerWidth, NotchGeometry.fallbackNotchWidth)
+        XCTAssertGreaterThan(large.compactSize(for: .none).width, small.compactSize(for: .none).width)
+        XCTAssertLessThan(NotchViewModel.largeIslandCornerRadius, NotchViewModel.largeIslandHeight / 2)
+    }
+
     func test_notificationCard_addsHeight() {
         let (vm, clean) = viewModel(island: .large)
         defer { clean() }

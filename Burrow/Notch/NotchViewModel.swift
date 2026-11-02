@@ -88,13 +88,20 @@ final class NotchViewModel: ObservableObject {
     static let notificationCardHeight: CGFloat = 46
     static let minIslandHeight: CGFloat = 18
     static let islandMenuBarMargin: CGFloat = 5
-    /// Adanın ortası (kamera yok, daha dar): boşken küçük bir hap.
+    /// Küçük adanın ortası (kamera yok, daha dar): boşken küçük bir hap.
     static let islandCenterWidth: CGFloat = 78
+    /// Büyük ada: ilk sanal çentik kadar geniş, köşeleri çentik oranında (tam hap değil).
+    static let largeIslandCenterWidth: CGFloat = NotchGeometry.fallbackNotchWidth
+    static let largeIslandCornerRadius: CGFloat = 11
+    var isLargeIsland: Bool { isIsland && services.settings.islandSize == .large }
     /// Büyük HUD'da çentiğin altına eklenen yükseklik.
     static let largeHUDExtraHeight: CGFloat = 34
 
     /// Ortadaki boş alan (fiziksel çentik / ada gövdesi) genişliği.
-    var centerWidth: CGFloat { isIsland ? Self.islandCenterWidth : geometry.notchSize.width }
+    var centerWidth: CGFloat {
+        guard isIsland else { return geometry.notchSize.width }
+        return isLargeIsland ? Self.largeIslandCenterWidth : Self.islandCenterWidth
+    }
     /// Kapalı hâlin ilk satır yüksekliği (çentik ya da ada).
     var barHeight: CGFloat { isIsland ? islandHeight : geometry.notchSize.height }
 

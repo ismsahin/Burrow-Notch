@@ -4,6 +4,10 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/). Sürümler `1.
 
 ## [Yayınlanmamış]
 
+### Değişti (v1.0.8)
+- **Büyük ada** artık ilk sanal çentik kadar geniş (185 pt) ve köşeleri çentik oranında (11 pt), tam hap değil.
+  Küçük ada hap olarak kaldı. Şarj yüzdesi dar alanda iki satıra kaymıyor.
+
 ### Eklendi (v1.0.7)
 - **YouTube ve tarayıcı medyası**: Chrome, Safari, Arc vb. ve sistemdeki her oynatıcı (podcast, VLC…) kapak, ilerleme ve
   kontrollerle çentikte. macOS 15.4+ kısıtı mediaremote-adapter (BSD-3) ile aşıldı; yoksa Müzik/Spotify yoluna düşer.

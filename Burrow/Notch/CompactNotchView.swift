@@ -155,6 +155,7 @@ struct CompactNotchView: View {
         case .charging(let percent, let isCharging):
             HStack(spacing: 4) {
                 Text("%\(percent)").font(.system(size: 11, weight: .semibold).monospacedDigit())
+                    .lineLimit(1).fixedSize()
                 BatteryGlyph(percent: percent, isCharging: isCharging)
             }
         case .lowBattery(let percent):

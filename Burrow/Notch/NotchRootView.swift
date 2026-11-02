@@ -44,14 +44,20 @@ struct NotchRootView: View {
     /// Fiziksel çentikte menü çubuğuna kaynaşan çentik şekli; çentiksiz ekranda "ada" seçiliyse yuvarlak hap.
     private var shape: AnyShape {
         if viewModel.isIsland {
-            let radius = viewModel.isExpanded ? 30 : min(size.height, viewModel.islandHeight) / 2 + (viewModel.isLargeHUD(activity.current) ? 6 : 0)
+            let radius = viewModel.isExpanded ? 30 : islandCompactRadius
             return AnyShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
         }
         return AnyShape(NotchShape(topRadius: viewModel.topRadius, bottomRadius: viewModel.bottomRadius))
     }
 
+    /// Küçük ada tam hap; büyük ada çentik gibi hafif yuvarlak köşeli.
+    private var islandCompactRadius: CGFloat {
+        let base = viewModel.isLargeIsland ? NotchViewModel.largeIslandCornerRadius : min(size.height, viewModel.islandHeight) / 2
+        return base + (viewModel.isLargeHUD(activity.current) ? 6 : 0)
+    }
+
     private var horizontalInset: CGFloat {
-        viewModel.isIsland ? viewModel.islandHeight * 0.25 : viewModel.topRadius
+        return viewModel.isIsland ? viewModel.islandHeight * 0.25 : viewModel.topRadius
     }
 
     private var notchBody: some View {

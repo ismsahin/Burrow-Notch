@@ -153,3 +153,9 @@ Her oturum sonunda en alta yeni kayıt ekle. **Eski kayıtları silme veya deği
   106/106 test; testler sonrası artık süreç yok; Release imzası geçerli, imzalı adaptör çalışıyor.
 - Doğrulanmayan: oynat/duraklat/ileri/geri ve atlama komutlarının tarayıcıda gerçek etkisi (kullanıcının Mac'inde ses
   çalmamak için denenmedi).
+
+## [011] 2026-11-02 — Büyük ada: daha geniş, çentik köşeli
+- İstek: "ilk denemelerdeki gibi, daha geniş, köşeleri orijinal çentik oranında". YouTube medyası kullanıcıda çalıştı (doğrulandı).
+- Yapılan: `NotchViewModel.largeIslandCenterWidth` = `NotchGeometry.fallbackNotchWidth` (185), `largeIslandCornerRadius` 11,
+  `isLargeIsland`; `NotchRootView` büyük adada sabit köşe yarıçapı. Şarj yüzdesi `.lineLimit(1).fixedSize()` (önceden "%7/6" kayıyordu).
+- Doğrulama: 107/107 test; LG ekranda Debug derlemesiyle boş/şarj/müzik/açık hâl ekran görüntüleri.
