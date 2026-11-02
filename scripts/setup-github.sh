@@ -108,7 +108,7 @@ else
 fi
 
 # 4) Yer tutucular + push
-grep -rl "__GITHUB_REPO__" README.md scripts/install.sh docs 2>/dev/null | while read -r f; do
+{ grep -rl "__GITHUB_REPO__" README.md scripts/install.sh docs 2>/dev/null || true; } | while read -r f; do
   sed -i '' "s#__GITHUB_REPO__#$FULL#g" "$f"
 done
 git add -A

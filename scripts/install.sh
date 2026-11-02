@@ -9,7 +9,7 @@ set -euo pipefail
 REPO="${BURROW_REPO:-ismsahin/Burrow-Notch}"
 # Yayın sertifikasının SHA-256 parmak izi (setup-github.sh doldurur). Zip + SHA256SUMS aynı sürümden geldiği için
 # yalnızca bütünlük sağlar; asıl kimlik doğrulaması bu sabitlenmiş sertifikadır.
-CERT_PIN="__CERT_SHA256__"
+CERT_PIN="2146be3c6ec22f2786fb5409ef197079fa7242cc599334db8f9f41d721c7bcca"
 BASE="https://github.com/$REPO/releases/latest/download"
 
 if [[ "$(uname)" != "Darwin" ]]; then echo "Burrow yalnızca macOS içindir."; exit 1; fi
