@@ -48,7 +48,7 @@ fi
 # 2) Sparkle anahtarları — araçlar SPM'in checksum ile doğruladığı sabit sürümden (project.yml) alınır
 command -v xcodegen >/dev/null || { echo "xcodegen gerekli: brew install xcodegen"; exit 1; }
 xcodegen generate --quiet
-xcodebuild -resolvePackageDependencies -project Burrow.xcodeproj -derivedDataPath build/DerivedData -quiet
+xcodebuild -resolvePackageDependencies -project Burrow.xcodeproj -scheme Burrow -derivedDataPath build/DerivedData -quiet
 TOOLS="$ROOT/build/DerivedData/SourcePackages/artifacts/sparkle/Sparkle"
 [[ -x "$TOOLS/bin/generate_keys" ]] || { echo "Sparkle araçları bulunamadı: $TOOLS/bin"; exit 1; }
 ACCOUNT="burrow-$OWNER"
