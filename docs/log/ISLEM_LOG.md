@@ -135,3 +135,7 @@ Her oturum sonunda en alta yeni kayıt ekle. **Eski kayıtları silme veya deği
   (Office önizlemesi), yıldızlılar dahil 500 sınırı; alarm uyanışta kaçırılmıyor (wake observer kaldırıldı, saat değişimi
   izleniyor), çalmayı durdurma bekleyen tekrarları iptal ediyor; bildirimler kapatılınca sayaç temizleniyor, durdurma
   sonrası geç sonuç yok sayılıyor, 50'den fazla yığın sonraki turda okunuyor, geçici SQLite kilidi "izin yok" göstermiyor.
+
+## [009] 2026-11-02 — Otomatik güncelleme doğrulandı
+- v1.0.6 yayınlandı (Actions yeşil). Kullanıcının kurulu Burrow'u Sparkle ile kendiliğinden 1.0.3 → 1.0.5'e geçmiş
+  (SULastCheckTime 18:23 UTC). Uçtan uca güncelleme hattı ilk kez gerçek kullanımda doğrulandı.

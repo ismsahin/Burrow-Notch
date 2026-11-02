@@ -13,6 +13,7 @@ Depo public, secret'lar kurulu, release hattı uçtan uca yeşil (test → derle
 - Kod değişikliği → `git push` → yeni sürüm otomatik. Yalnızca doküman değişikliği sürüm çıkarmaz.
 
 ## Tamamlananlar
+- [x] **Otomatik güncelleme gerçekte doğrulandı:** kurulu 1.0.3 → 1.0.5'e Sparkle ile kendiliğinden geçti (2026-11-02 21:23)
 - [x] Çentik paneli, fare takibi, tıklama geçirgenliği (yalnızca görünen şekil tıklama alır)
 - [x] Canlı etkinlikler: müzik, şarj, düşük pil, ses/parlaklık HUD, Bluetooth
 - [x] Açık çentik: oynatıcı + sürüklenebilir ilerleme + kapak rengi, takvim, ayna, pil
@@ -37,7 +38,6 @@ Depo public, secret'lar kurulu, release hattı uçtan uca yeşil (test → derle
   mantık birim testli, görünüm `scripts/debug-notch.sh` ile doğrulandı)
 - Müzik/Spotify çalarken uçtan uca (betikler gerçek AppleScript derleyicisinde derleniyor, ayrıştırıcı testli)
 - Medya tuşu yakalama, parlaklık, kamera, takvim izin akışları
-- Kurulu bir sürümün Sparkle ile bir sonrakine kendiliğinden güncellenmesi (1.0.3 kurulu; saatlik kontrol bekleniyor)
 - AirPods pil anahtarları gerçek cihazla; Safari/Chrome indirme ilerlemesi gerçek indirmeyle
 
 ## Bilinen sınırlar
