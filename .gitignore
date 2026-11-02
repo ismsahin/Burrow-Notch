@@ -1,0 +1,21 @@
+# xcodegen çıktısı (project.yml'den üretilir)
+Burrow.xcodeproj/
+Burrow/Resources/Info.plist
+Burrow/Resources/Burrow.entitlements
+
+# Derleme
+build/
+dist/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# Gizli dosyalar — asla commit'leme
+*.p12
+*.pem
+*.key
+*.cer
+.env
+sparkle_private_key*
+
+.DS_Store

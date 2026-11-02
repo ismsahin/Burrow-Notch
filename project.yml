@@ -1,0 +1,103 @@
+name: Burrow
+options:
+  bundleIdPrefix: com.ismsahin
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+  developmentLanguage: tr
+
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: 2.10.1
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # CI tarafından ezilir (bkz. .github/workflows/release.yml)
+    BURROW_FEED_URL: ""
+    BURROW_PUBLIC_ED_KEY: ""
+
+targets:
+  Burrow:
+    type: application
+    platform: macOS
+    sources:
+      - path: Burrow
+    dependencies:
+      - package: Sparkle
+    info:
+      path: Burrow/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Burrow
+        CFBundleName: Burrow
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSApplicationCategoryType: public.app-category.utilities
+        LSMinimumSystemVersion: "14.0"
+        LSUIElement: true
+        NSHumanReadableCopyright: "© 2026 Burrow"
+        NSAppleEventsUsageDescription: "Burrow, çalan şarkıyı göstermek ve kontrol etmek için Müzik ve Spotify ile konuşur."
+        NSCalendarsFullAccessUsageDescription: "Burrow, yaklaşan etkinliklerini çentikte göstermek için takvimini okur."
+        NSCalendarsUsageDescription: "Burrow, yaklaşan etkinliklerini çentikte göstermek için takvimini okur."
+        NSCameraUsageDescription: "Burrow, ayna özelliği için kamerayı yalnızca sen açtığında kullanır."
+        NSBluetoothAlwaysUsageDescription: "Burrow, kulaklık gibi cihazlar bağlandığında çentikte bildirim gösterir."
+        SUFeedURL: $(BURROW_FEED_URL)
+        SUPublicEDKey: $(BURROW_PUBLIC_ED_KEY)
+        SUEnableAutomaticChecks: true
+        SUAutomaticallyUpdate: true
+        SUScheduledCheckInterval: 3600
+        SUVerifyUpdateBeforeExtraction: true
+    entitlements:
+      path: Burrow/Resources/Burrow.entitlements
+      properties:
+        com.apple.security.automation.apple-events: true
+        com.apple.security.device.camera: true
+        com.apple.security.personal-information.calendars: true
+        # Developer ID olmadan (ad-hoc / self-signed) gömülü Sparkle.framework'ün yüklenebilmesi için gerekli.
+        # Diğer hardened runtime korumaları (DYLD ortam değişkeni enjeksiyonu engeli vb.) açık kalır. Bkz. karar 0005.
+        com.apple.security.cs.disable-library-validation: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ismsahin.Burrow
+        PRODUCT_NAME: Burrow
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        COMBINE_HIDPI_IMAGES: YES
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+      configs:
+        # Test paketi host uygulamaya enjekte edilebilsin diye Debug'da kapalı; Release (dağıtım) her zaman açık.
+        Debug:
+          ENABLE_HARDENED_RUNTIME: NO
+
+  BurrowTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: BurrowTests
+    dependencies:
+      - target: Burrow
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ismsahin.BurrowTests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        BUNDLE_LOADER: $(TEST_HOST)
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Burrow.app/Contents/MacOS/Burrow
+
+schemes:
+  Burrow:
+    build:
+      targets:
+        Burrow: all
+        BurrowTests: [test]
+    test:
+      targets:
+        - BurrowTests

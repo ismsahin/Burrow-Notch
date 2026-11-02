@@ -1,0 +1,131 @@
+# main'e her kod push'unda: test → derle → imzala → Sparkle ile imzala → GitHub Release + appcast.xml
+# Kurulu uygulamalar appcast'i saatlik denetler ve yeni sürümü otomatik indirip kurar.
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - ".gitignore"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode seç
+        run: |
+          XCODE="$(ls -d /Applications/Xcode_16*.app | sort -V | tail -1)"
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Gizli anahtarları denetle
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          SPARKLE_PUBLIC_KEY: ${{ vars.SPARKLE_PUBLIC_KEY }}
+        run: |
+          if [[ -z "$SPARKLE_PRIVATE_KEY" || -z "$SPARKLE_PUBLIC_KEY" ]]; then
+            echo "::error::SPARKLE_PRIVATE_KEY secret veya SPARKLE_PUBLIC_KEY variable yok. Yerelde scripts/setup-github.sh çalıştırın."
+            exit 1
+          fi
+
+      - name: Proje üret
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Test
+        run: |
+          xcodebuild test -project Burrow.xcodeproj -scheme Burrow -destination 'platform=macOS' \
+            -derivedDataPath build/TestData -quiet
+
+      - name: Sürüm numarası
+        id: version
+        run: |
+          echo "build=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "version=1.0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: İmza sertifikasını yükle
+        id: cert
+        env:
+          P12: ${{ secrets.MACOS_CERT_P12 }}
+          P12_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          if [[ -z "$P12" ]]; then
+            echo "::warning::MACOS_CERT_P12 yok; ad-hoc imza kullanılacak (güncellemelerde izinler sıfırlanabilir)."
+            echo "identity=-" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          KEYCHAIN="$RUNNER_TEMP/build.keychain-db"
+          KC_PASS="$(openssl rand -hex 16)"
+          echo "$P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KC_PASS" "$KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN"
+          security unlock-keychain -p "$KC_PASS" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KC_PASS" "$KEYCHAIN" >/dev/null
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          security find-certificate -c "Burrow Self-Signed" -p "$KEYCHAIN" > "$RUNNER_TEMP/cert.pem"
+          sudo security add-trusted-cert -d -r trustRoot -p codeSign -k /Library/Keychains/System.keychain "$RUNNER_TEMP/cert.pem"
+          rm -f "$RUNNER_TEMP/cert.p12"
+          echo "identity=Burrow Self-Signed" >> "$GITHUB_OUTPUT"
+
+      - name: Release derle
+        run: |
+          xcodebuild -project Burrow.xcodeproj -scheme Burrow -configuration Release \
+            -derivedDataPath build/DerivedData -destination 'platform=macOS' build -quiet \
+            MARKETING_VERSION="${{ steps.version.outputs.version }}" \
+            CURRENT_PROJECT_VERSION="${{ steps.version.outputs.build }}" \
+            BURROW_FEED_URL="https://github.com/${{ github.repository }}/releases/latest/download/appcast.xml" \
+            BURROW_PUBLIC_ED_KEY="${{ vars.SPARKLE_PUBLIC_KEY }}"
+
+      - name: İmzala ve paketle
+        run: |
+          APP="build/DerivedData/Build/Products/Release/Burrow.app"
+          scripts/sign-app.sh "$APP" "${{ steps.cert.outputs.identity }}"
+          /usr/libexec/PlistBuddy -c "Print :SUFeedURL" "$APP/Contents/Info.plist"
+          mkdir -p dist
+          ditto -c -k --sequesterRsrc --keepParent "$APP" dist/Burrow.zip
+          (cd dist && shasum -a 256 Burrow.zip > SHA256SUMS)
+
+      - name: Sparkle imzası + appcast
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          # Komut enjeksiyonunu önlemek için commit mesajı ortam değişkeniyle geçirilir.
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          # Özel anahtar yalnızca SPM'in checksum ile doğruladığı, sürümü sabit (project.yml) Sparkle aracına verilir.
+          SIGN="build/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin/sign_update"
+          test -x "$SIGN" || { echo "::error::sign_update bulunamadı"; exit 1; }
+          SIG_ATTRS="$(printf '%s' "$SPARKLE_PRIVATE_KEY" | "$SIGN" --ed-key-file - dist/Burrow.zip)"
+          scripts/make-appcast.sh \
+            "${{ steps.version.outputs.version }}" "${{ steps.version.outputs.build }}" \
+            "https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/Burrow.zip" \
+            "$SIG_ATTRS" "${COMMIT_MSG:-Manuel sürüm}" > dist/appcast.xml
+          cat dist/appcast.xml
+
+      - name: GitHub Release yayınla
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            dist/Burrow.zip dist/appcast.xml dist/SHA256SUMS \
+            --title "Burrow ${{ steps.version.outputs.version }}" \
+            --notes "Otomatik sürüm — commit ${GITHUB_SHA::7}" \
+            --latest
+
+      - name: Anahtar zincirini temizle
+        if: always()
+        run: security delete-keychain "$RUNNER_TEMP/build.keychain-db" 2>/dev/null || true
