@@ -159,3 +159,15 @@ Her oturum sonunda en alta yeni kayıt ekle. **Eski kayıtları silme veya deği
 - Yapılan: `NotchViewModel.largeIslandCenterWidth` = `NotchGeometry.fallbackNotchWidth` (185), `largeIslandCornerRadius` 11,
   `isLargeIsland`; `NotchRootView` büyük adada sabit köşe yarıçapı. Şarj yüzdesi `.lineLimit(1).fixedSize()` (önceden "%7/6" kayıyordu).
 - Doğrulama: 107/107 test; LG ekranda Debug derlemesiyle boş/şarj/müzik/açık hâl ekran görüntüleri.
+
+## [012] 2026-11-03 — Ada köşe ayarı, anımsatıcı kategorileri, özelleştirilebilir ana ekran
+- İstek: 185 pt fazla geniş → daralt; eski hap da ayarda kalsın; anımsatıcılarda kategori seçimi; ana ekran özelleştirme; ayna düğmesi küçük.
+- Yapılan: `IslandCorners` (.rounded 78 pt / .squared 120 pt, yarıçap = yükseklik × 0.32); `HomeWidget` + `homeLayout`
+  (sıralı; eski showCalendar/enableMirror anahtarlarından taşınır, artık hesaplanan özellik); `ReminderList`, `ReminderItem.listID`,
+  `ReminderService.resolvedListID` (boş → ilk liste, `__all__` → tümü), çipler + `HomeRemindersView`; `MirrorView.smallSize` 44.
+- Kod incelemesi: küçük ada kullanıcılarının görünümü değişmesin diye köşe varsayılanı boyuta bağlandı; liste aynıysa yayınlanmıyor;
+  ayna ana ekrandan kalkınca kamera durduruluyor.
+- Doğrulama: 111/111 test; LG ekranda köşeli ada (120 pt) ve yeni ana ekran (küçük ayna) ekran görüntüsü.
+- Not: Bu sırada XProtect %355 CPU ile yeni ikilileri taradığı için test çalıştırıcı ve `swift` betiği takıldı; tarama bitince geçti.
+  `debug-notch.sh` yerine `osascript -l JavaScript` ile dağıtık bildirim gönderilebilir.
+- Doğrulanmayan: anımsatıcı çipleri gerçek listelerle (Debug derlemesinin anımsatıcı izni yok).

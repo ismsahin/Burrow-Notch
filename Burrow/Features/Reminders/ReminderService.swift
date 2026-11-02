@@ -6,9 +6,17 @@ struct ReminderItem: Identifiable, Equatable {
     let id: String
     let title: String
     let due: Date?
+    let listID: String
     let listName: String
     let color: NSColor
     let isFlagged: Bool
+}
+
+/// Anımsatıcı listesi (kategori).
+struct ReminderList: Identifiable, Equatable {
+    let id: String
+    let title: String
+    let color: NSColor
 }
 
 /// Tamamlanmamış anımsatıcılar. İzin yalnızca sekme ilk açıldığında istenir.
@@ -17,11 +25,14 @@ final class ReminderService: ObservableObject {
     enum Access: Equatable { case unknown, granted, denied }
 
     @Published private(set) var items: [ReminderItem] = []
+    @Published private(set) var lists: [ReminderList] = []
     @Published private(set) var access: Access = .unknown
 
     private let store = EKEventStore()
     private var observer: NSObjectProtocol?
-    private static let maxItems = 30
+    private static let maxItems = 300
+    /// Seçimde "tüm listeler".
+    nonisolated static let allListsID = "__all__"
 
     init() {
         access = Self.currentAccess()
@@ -53,13 +64,18 @@ final class ReminderService: ObservableObject {
 
     func reload() {
         access = Self.currentAccess()
-        guard access == .granted else { items = []; return }
+        guard access == .granted else { items = []; lists = []; return }
+        let newLists = store.calendars(for: .reminder)
+            .map { ReminderList(id: $0.calendarIdentifier, title: $0.title, color: $0.color ?? .systemOrange) }
+            .sorted { $0.title.localizedCompare($1.title) == .orderedAscending }
+        if newLists != lists { lists = newLists }
         let predicate = store.predicateForIncompleteReminders(withDueDateStarting: nil, ending: nil, calendars: nil)
         store.fetchReminders(matching: predicate) { [weak self] reminders in
             let mapped = (reminders ?? []).map { reminder in
                 ReminderItem(id: reminder.calendarItemIdentifier,
                              title: reminder.title ?? "Anımsatıcı",
                              due: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
+                             listID: reminder.calendar?.calendarIdentifier ?? "",
                              listName: reminder.calendar?.title ?? "",
                              color: reminder.calendar?.color ?? .systemOrange,
                              isFlagged: reminder.priority == 1)
@@ -86,6 +102,20 @@ final class ReminderService: ObservableObject {
         if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.reminders") {
             NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
         }
+    }
+
+    /// Saf: kayıtlı seçimi geçerli bir listeye çözer. `nil` = tüm listeler.
+    /// Boş ya da silinmiş liste → ilk liste (hepsi toplu gösterilmez).
+    nonisolated static func resolvedListID(_ selected: String, lists: [ReminderList]) -> String? {
+        if selected == allListsID { return nil }
+        if lists.contains(where: { $0.id == selected }) { return selected }
+        return lists.first?.id
+    }
+
+    /// Saf: seçili listedeki öğeler (`nil` = hepsi).
+    nonisolated static func items(_ items: [ReminderItem], inList listID: String?) -> [ReminderItem] {
+        guard let listID else { return items }
+        return items.filter { $0.listID == listID }
     }
 
     /// Saf: tarihi olanlar (yakın önce), sonra tarihsizler; eşitlikte başlığa göre.

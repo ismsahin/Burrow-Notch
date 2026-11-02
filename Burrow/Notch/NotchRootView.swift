@@ -50,10 +50,9 @@ struct NotchRootView: View {
         return AnyShape(NotchShape(topRadius: viewModel.topRadius, bottomRadius: viewModel.bottomRadius))
     }
 
-    /// Küçük ada tam hap; büyük ada çentik gibi hafif yuvarlak köşeli.
+    /// Hap ya da çentik gibi köşeli (ayar: Ada köşeleri).
     private var islandCompactRadius: CGFloat {
-        let base = viewModel.isLargeIsland ? NotchViewModel.largeIslandCornerRadius : min(size.height, viewModel.islandHeight) / 2
-        return base + (viewModel.isLargeHUD(activity.current) ? 6 : 0)
+        min(size.height / 2, viewModel.islandCornerRadius) + (viewModel.isLargeHUD(activity.current) ? 6 : 0)
     }
 
     private var horizontalInset: CGFloat {

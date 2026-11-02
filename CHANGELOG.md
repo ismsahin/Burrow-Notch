@@ -4,6 +4,13 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/). Sürümler `1.
 
 ## [Yayınlanmamış]
 
+### Eklendi / Değişti (v1.0.9)
+- **Ada köşeleri** ayarı: Yuvarlak (hap, 78 pt) ya da Köşeli (çentik gibi, 120 pt; 185'ten daraltıldı).
+  Seçilmemişse büyük adada köşeli, küçük adada hap.
+- **Anımsatıcı kategorileri**: üstte liste çipleri (renk + sayı); varsayılan ilk liste, "Tümü" isteğe bağlı. Seçim hatırlanır.
+- **Ana ekranı özelleştir** (Ayarlar › Etkinlikler › Ana Ekran): Müzik, Takvim, Anımsatıcılar, Kamera aynası; aç/kapa + sırala.
+- **Ayna düğmesi küçüldü** (44 pt, yalnızca simge); tıklayınca yine büyür. Ana ekrandan kaldırılırsa kamera kapanır.
+
 ### Değişti (v1.0.8)
 - **Büyük ada** artık ilk sanal çentik kadar geniş (185 pt) ve köşeleri çentik oranında (11 pt), tam hap değil.
   Küçük ada hap olarak kaldı. Şarj yüzdesi dar alanda iki satıra kaymıyor.

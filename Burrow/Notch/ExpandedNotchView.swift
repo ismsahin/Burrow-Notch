@@ -98,7 +98,7 @@ struct ExpandedNotchView: View {
             ClipboardView(store: services.clipboard)
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
         case .reminders:
-            RemindersView(service: services.reminders)
+            RemindersView(service: services.reminders, settings: services.settings)
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
         case .notifications:
             NotificationsView(service: services.notifications, isEnabled: settings.enableNotifications)

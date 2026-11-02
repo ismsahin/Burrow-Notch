@@ -4,8 +4,10 @@ import SwiftUI
 struct MirrorView: View {
     @ObservedObject var mirror: CameraMirror
     let isLarge: Bool
+    /// Küçük hâl yalnızca bir düğme: tıklayınca zaten büyüyor.
+    static let smallSize: CGFloat = 44
 
-    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: isLarge ? 20 : 16, style: .continuous) }
+    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: isLarge ? 20 : 12, style: .continuous) }
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -25,7 +27,7 @@ struct MirrorView: View {
                         label(symbol: "person.crop.square", text: "Ayna")
                     }
                 }
-                .frame(width: isLarge ? nil : 84, height: isLarge ? nil : 84)
+                .frame(width: isLarge ? nil : Self.smallSize, height: isLarge ? nil : Self.smallSize)
                 .contentShape(shape)
             }
             .buttonStyle(.plain)
@@ -46,11 +48,19 @@ struct MirrorView: View {
         }
     }
 
+    @ViewBuilder
     private func label(symbol: String, text: String) -> some View {
-        VStack(spacing: 4) {
-            Image(systemName: symbol).font(.system(size: 18, weight: .medium))
-            Text(text).font(.system(size: 10, weight: .medium))
+        if isLarge {
+            VStack(spacing: 4) {
+                Image(systemName: symbol).font(.system(size: 18, weight: .medium))
+                Text(text).font(.system(size: 10, weight: .medium))
+            }
+            .foregroundStyle(.white.opacity(0.6))
+        } else {
+            Image(systemName: symbol)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(.white.opacity(0.7))
+                .help(text)
         }
-        .foregroundStyle(.white.opacity(0.6))
     }
 }

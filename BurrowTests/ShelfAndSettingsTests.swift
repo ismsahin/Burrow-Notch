@@ -82,6 +82,29 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertFalse(AppSettings(defaults: defaults).enableMirror)
     }
 
+    func test_homeLayout_toggleAndMove() {
+        let layout: [HomeWidget] = [.media, .calendar, .mirror]
+        XCTAssertEqual(HomeWidget.toggled(layout, .reminders, isOn: true), [.media, .calendar, .mirror, .reminders])
+        XCTAssertEqual(HomeWidget.toggled(layout, .calendar, isOn: false), [.media, .mirror])
+        XCTAssertEqual(HomeWidget.moved(layout, .mirror, by: -1), [.media, .mirror, .calendar])
+        XCTAssertEqual(HomeWidget.moved(layout, .media, by: -1), layout, "Sınırda yerinde kalır")
+        XCTAssertEqual(HomeWidget.parse(["media", "bogus", "media", "mirror"]), [.media, .mirror])
+    }
+
+    func test_homeLayout_migratesLegacyToggles_andPersists() {
+        let suite = "BurrowTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.set(false, forKey: AppSettings.Key.showCalendar)
+        let settings = AppSettings(defaults: defaults)
+        XCTAssertEqual(settings.homeLayout, [.media, .mirror])
+        settings.homeLayout = [.reminders, .media]
+        XCTAssertEqual(AppSettings(defaults: defaults).homeLayout, [.reminders, .media])
+        XCTAssertEqual(AppSettings(defaults: defaults).islandCorners, .squared, "Büyük ada (varsayılan) köşeli")
+        defaults.set(IslandSize.compact.rawValue, forKey: AppSettings.Key.islandSize)
+        XCTAssertEqual(AppSettings(defaults: defaults).islandCorners, .rounded, "Küçük ada eskisi gibi hap kalır")
+    }
+
     func test_legacySettings_areMigrated() {
         let suite = "BurrowTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!

@@ -114,13 +114,31 @@ final class AlarmTests: XCTestCase {
 }
 
 final class ReminderSortTests: XCTestCase {
+    private let lists = [ReminderList(id: "a", title: "Ev", color: .red), ReminderList(id: "b", title: "İş", color: .blue)]
+
+    func test_resolvedList_defaultsToFirstList_notAll() {
+        XCTAssertEqual(ReminderService.resolvedListID("", lists: lists), "a")
+        XCTAssertEqual(ReminderService.resolvedListID("silinmis", lists: lists), "a")
+        XCTAssertEqual(ReminderService.resolvedListID("b", lists: lists), "b")
+        XCTAssertNil(ReminderService.resolvedListID(ReminderService.allListsID, lists: lists))
+    }
+
+    func test_itemsInList_filtersByCategory() {
+        let items = [
+            ReminderItem(id: "1", title: "x", due: nil, listID: "a", listName: "Ev", color: .red, isFlagged: false),
+            ReminderItem(id: "2", title: "y", due: nil, listID: "b", listName: "İş", color: .blue, isFlagged: false),
+        ]
+        XCTAssertEqual(ReminderService.items(items, inList: "b").map(\.id), ["2"])
+        XCTAssertEqual(ReminderService.items(items, inList: nil).count, 2)
+    }
+
     func test_datedFirstThenUndatedByTitle() {
         let now = Date()
         let items = [
-            ReminderItem(id: "1", title: "Zeta", due: nil, listName: "", color: .red, isFlagged: false),
-            ReminderItem(id: "2", title: "Geç", due: now.addingTimeInterval(3600), listName: "", color: .red, isFlagged: false),
-            ReminderItem(id: "3", title: "Erken", due: now, listName: "", color: .red, isFlagged: false),
-            ReminderItem(id: "4", title: "Alfa", due: nil, listName: "", color: .red, isFlagged: false),
+            ReminderItem(id: "1", title: "Zeta", due: nil, listID: "", listName: "", color: .red, isFlagged: false),
+            ReminderItem(id: "2", title: "Geç", due: now.addingTimeInterval(3600), listID: "", listName: "", color: .red, isFlagged: false),
+            ReminderItem(id: "3", title: "Erken", due: now, listID: "", listName: "", color: .red, isFlagged: false),
+            ReminderItem(id: "4", title: "Alfa", due: nil, listID: "", listName: "", color: .red, isFlagged: false),
         ]
         XCTAssertEqual(ReminderService.sorted(items).map(\.id), ["3", "2", "4", "1"])
     }
@@ -216,16 +234,18 @@ final class NewSizingTests: XCTestCase {
         XCTAssertEqual(large.islandHeight, NotchViewModel.largeIslandHeight)
     }
 
-    func test_largeIsland_isWiderWithNotchLikeCorners() {
-        let (small, c1) = viewModel(island: .compact)
-        defer { c1() }
-        let (large, c2) = viewModel(island: .large)
-        defer { c2() }
-        XCTAssertTrue(large.isLargeIsland)
-        XCTAssertFalse(small.isLargeIsland)
-        XCTAssertEqual(large.centerWidth, NotchGeometry.fallbackNotchWidth)
-        XCTAssertGreaterThan(large.compactSize(for: .none).width, small.compactSize(for: .none).width)
-        XCTAssertLessThan(NotchViewModel.largeIslandCornerRadius, NotchViewModel.largeIslandHeight / 2)
+    func test_squaredIsland_isWiderWithNotchLikeCorners() {
+        let (vm, clean) = viewModel(island: .large)
+        defer { clean() }
+        vm.services.settings.islandCorners = .rounded
+        let roundedWidth = vm.compactSize(for: .none).width
+        XCTAssertEqual(vm.islandCornerRadius, vm.islandHeight / 2)
+        vm.services.settings.islandCorners = .squared
+        XCTAssertTrue(vm.isSquaredIsland)
+        XCTAssertEqual(vm.centerWidth, NotchViewModel.squaredIslandCenterWidth)
+        XCTAssertGreaterThan(vm.compactSize(for: .none).width, roundedWidth)
+        XCTAssertLessThan(vm.centerWidth, NotchGeometry.fallbackNotchWidth)
+        XCTAssertLessThan(vm.islandCornerRadius, vm.islandHeight / 2)
     }
 
     func test_notificationCard_addsHeight() {

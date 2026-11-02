@@ -90,17 +90,21 @@ final class NotchViewModel: ObservableObject {
     static let islandMenuBarMargin: CGFloat = 5
     /// Küçük adanın ortası (kamera yok, daha dar): boşken küçük bir hap.
     static let islandCenterWidth: CGFloat = 78
-    /// Büyük ada: ilk sanal çentik kadar geniş, köşeleri çentik oranında (tam hap değil).
-    static let largeIslandCenterWidth: CGFloat = NotchGeometry.fallbackNotchWidth
-    static let largeIslandCornerRadius: CGFloat = 11
-    var isLargeIsland: Bool { isIsland && services.settings.islandSize == .large }
+    /// Köşeli ada: hap'ten biraz geniş, köşeleri çentik oranında (yükseklikle orantılı).
+    static let squaredIslandCenterWidth: CGFloat = 120
+    static let squaredIslandCornerRatio: CGFloat = 0.32
+    var isSquaredIsland: Bool { isIsland && services.settings.islandCorners == .squared }
+    /// Kapalı adanın köşe yarıçapı: hap'te yarı yükseklik, köşelide çentik oranı.
+    var islandCornerRadius: CGFloat {
+        isSquaredIsland ? (islandHeight * Self.squaredIslandCornerRatio).rounded() : islandHeight / 2
+    }
     /// Büyük HUD'da çentiğin altına eklenen yükseklik.
     static let largeHUDExtraHeight: CGFloat = 34
 
     /// Ortadaki boş alan (fiziksel çentik / ada gövdesi) genişliği.
     var centerWidth: CGFloat {
         guard isIsland else { return geometry.notchSize.width }
-        return isLargeIsland ? Self.largeIslandCenterWidth : Self.islandCenterWidth
+        return isSquaredIsland ? Self.squaredIslandCenterWidth : Self.islandCenterWidth
     }
     /// Kapalı hâlin ilk satır yüksekliği (çentik ya da ada).
     var barHeight: CGFloat { isIsland ? islandHeight : geometry.notchSize.height }

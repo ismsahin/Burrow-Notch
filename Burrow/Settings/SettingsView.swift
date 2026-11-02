@@ -70,6 +70,10 @@ struct SettingsView: View {
                         ForEach(IslandSize.allCases) { Text($0.title).tag($0) }
                     }
                     .pickerStyle(.segmented)
+                    Picker("Ada köşeleri", selection: $settings.islandCorners) {
+                        ForEach(IslandCorners.allCases) { Text($0.title).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
                 }
                 Toggle("Çentik dış çizgisi", isOn: $settings.notchOutline)
             }
@@ -119,16 +123,48 @@ struct SettingsView: View {
                     NotificationAccessRow(service: services.notifications)
                 }
             }
+            Section("Ana Ekran") {
+                ForEach(homeRows) { widget in homeRow(widget) }
+                Text("Açık çentiğin ilk sekmesinde görünecekler. Oklarla sırasını değiştir; aynaya tıklayınca büyür.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             Section("Açık Çentik") {
                 Toggle("Pano geçmişi", isOn: $settings.enableClipboard)
-                Toggle("Anımsatıcılar", isOn: $settings.enableReminders)
-                Toggle("Takvim", isOn: $settings.showCalendar)
-                Toggle("Kamera aynası", isOn: $settings.enableMirror)
+                Toggle("Anımsatıcılar sekmesi", isOn: $settings.enableReminders)
                 Toggle("Dosya rafı", isOn: $settings.enableShelf)
                 Toggle("Kapak rengiyle ışıma", isOn: $settings.albumTint)
             }
         }
         .formStyle(.grouped)
+    }
+
+    /// Önce gösterilenler (sırasıyla), sonra gizliler.
+    private var homeRows: [HomeWidget] {
+        settings.homeLayout + HomeWidget.allCases.filter { !settings.homeLayout.contains($0) }
+    }
+
+    private func homeRow(_ widget: HomeWidget) -> some View {
+        let isOn = settings.homeLayout.contains(widget)
+        let index = settings.homeLayout.firstIndex(of: widget)
+        return HStack {
+            Toggle(isOn: Binding(
+                get: { settings.homeLayout.contains(widget) },
+                set: { settings.homeLayout = HomeWidget.toggled(settings.homeLayout, widget, isOn: $0) }
+            )) {
+                Label(widget.title, systemImage: widget.symbol)
+            }
+            if isOn {
+                Button { settings.homeLayout = HomeWidget.moved(settings.homeLayout, widget, by: -1) } label: {
+                    Image(systemName: "chevron.up")
+                }
+                .disabled(index == 0)
+                Button { settings.homeLayout = HomeWidget.moved(settings.homeLayout, widget, by: 1) } label: {
+                    Image(systemName: "chevron.down")
+                }
+                .disabled(index == settings.homeLayout.count - 1)
+            }
+        }
+        .buttonStyle(.borderless)
     }
 
     private var hud: some View {
