@@ -29,7 +29,10 @@ enum MediaPlayer: String, CaseIterable, Codable {
 
 /// Çalan parça anlık görüntüsü. Değer tipi, değişmez.
 struct MediaInfo: Equatable {
-    let player: MediaPlayer
+    /// AppleScript ile kontrol edilebilen oynatıcı (Müzik/Spotify); tarayıcı vb. için nil.
+    let player: MediaPlayer?
+    /// Çalan uygulamanın kimliği (ör. com.google.Chrome).
+    let appBundleID: String
     let trackID: String
     let title: String
     let artist: String
@@ -44,6 +47,12 @@ struct MediaInfo: Equatable {
         guard isPlaying else { return position }
         let elapsed = max(0, date.timeIntervalSince(capturedAt))
         return duration > 0 ? min(duration, position + elapsed) : position + elapsed
+    }
+
+    /// Yeni konum/durumla kopya (değişmez güncelleme).
+    func with(position: TimeInterval, isPlaying: Bool, at date: Date = Date()) -> MediaInfo {
+        MediaInfo(player: player, appBundleID: appBundleID, trackID: trackID, title: title, artist: artist, album: album,
+                  duration: duration, position: position, isPlaying: isPlaying, capturedAt: date)
     }
 
     var progress: Double {
@@ -74,6 +83,7 @@ enum MediaInfoParser {
 
         return MediaInfo(
             player: player,
+            appBundleID: player.bundleID,
             trackID: fields[6].isEmpty ? "\(title)-\(fields[2])" : fields[6],
             title: title,
             artist: fields[2],

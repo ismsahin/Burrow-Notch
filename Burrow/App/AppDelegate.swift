@@ -91,6 +91,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         controllers.values.forEach { $0.close() }
         services?.updateKeyTap(enabled: false)
+        services?.media.shutdown()
     }
 
     /// Aynı uygulamanın ikinci kopyası açılırsa (ör. güncelleme sonrası) kendini kapatır.

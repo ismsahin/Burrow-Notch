@@ -29,6 +29,17 @@ targets:
       - path: Burrow
     dependencies:
       - package: Sparkle
+    postCompileScripts:
+      # Sistem geneli "şu an çalan" için mediaremote-adapter (BSD-3, Vendor/) — kaynaktan derlenir. Bkz. karar 0009.
+      - name: MediaRemoteAdapter
+        basedOnDependencyAnalysis: false
+        script: |
+          set -euo pipefail
+          "$SRCROOT/scripts/build-mediaremote-adapter.sh" "$DERIVED_FILE_DIR/mra"
+          mkdir -p "$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH" "$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH"
+          rm -rf "$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH/MediaRemoteAdapter.framework"
+          ditto "$DERIVED_FILE_DIR/mra/MediaRemoteAdapter.framework" "$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH/MediaRemoteAdapter.framework"
+          cp "$SRCROOT/Vendor/mediaremote-adapter/bin/mediaremote-adapter.pl" "$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/"
     info:
       path: Burrow/Resources/Info.plist
       properties:

@@ -1,7 +1,7 @@
 # 0009 — Bildirimler (Tam Disk Erişimi), pano geçmişi, tarayıcı medyası
 
 - **Tarih:** 2026-11-02
-- **Durum:** Bildirim ve pano: Kabul · Tarayıcı medyası: **Kullanıcı onayı bekliyor**
+- **Durum:** Kabul (tarayıcı medyası kullanıcı onayıyla 2026-11-02'de eklendi)
 
 ## Bildirimler
 - Kullanıcı açıkça "tam disk erişimi iste, tüm bildirimler önce büyük sonra küçük" istedi.
@@ -28,5 +28,10 @@
   okur. Boring Notch da bunu kullanıyor.
 - Plan: kaynağı `Vendor/` altına kopyala (lisansla), derleme sırasında **kaynaktan** clang ile derle (hazır ikili yok),
   `Contents/Frameworks` içinde bizim sertifikamızla imzala; Müzik/Spotify AppleScript yolu yedek olarak kalsın.
-- **Durum:** Claude Code'un otomatik güvenlik denetimi dış kaynaklı kodu derleyip çalıştırmayı durdurdu.
-  Kullanıcı onay verirse uygulanacak. Onaylanana kadar Vendor klasörü eklenmedi.
+- **Durum:** İlk denemede Claude Code'un otomatik güvenlik denetimi durdurdu; kullanıcı açıkça onayladı ("evet ekle").
+  Kaynak tarandı (ağ yok, dosya yazma yok, `NSTask` yalnızca kullanılmayan `test` komutunda), `Vendor/` altına alındı,
+  Xcode derleme aşamasında `scripts/build-mediaremote-adapter.sh` ile kaynaktan derleniyor, `Contents/Frameworks`
+  içinde imzalanıyor. Adaptör yoksa/başarısızsa Müzik/Spotify AppleScript yoluna otomatik düşülür.
+- **Süreç güvenliği:** `perl ... stream` arka plan süreci uygulama kapanınca durdurulur; SIGTERM/SIGINT normal
+  kapanışa yönlendirildi; açılışta önceki çökmeden kalmış artık süreçler (yalnızca bizim framework yolumuzla eşleşen)
+  kapatılır; testlerde hiç başlatılmaz.

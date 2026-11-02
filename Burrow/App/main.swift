@@ -12,4 +12,16 @@ let delegate = MainActor.assumeIsolated { AppDelegate() }
 if !isRunningTests {
     app.delegate = delegate
 }
+
+// SIGTERM/SIGINT (ör. `pkill`, oturum kapanışı) normal kapanışa yönlendirilir; böylece
+// applicationWillTerminate çalışır ve arka plandaki medya akış süreci geride kalmaz.
+signal(SIGTERM, SIG_IGN)
+signal(SIGINT, SIG_IGN)
+let terminationSources = [SIGTERM, SIGINT].map { sig -> DispatchSourceSignal in
+    let source = DispatchSource.makeSignalSource(signal: sig, queue: .main)
+    source.setEventHandler { NSApp.terminate(nil) }
+    source.resume()
+    return source
+}
+
 app.run()

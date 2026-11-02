@@ -3,8 +3,9 @@ import Combine
 import CoreImage
 
 /// Çalan medyayı izler ve kontrol eder.
-/// Güncelleme tetikleyicileri: oynatıcının dağıtık bildirimi (anında) + hafif periyodik yoklama (konum kayması için).
-/// Hiçbir oynatıcı açık değilken yoklama yapılmaz.
+///
+/// Birincil kaynak: sistem geneli MediaRemote (`MediaRemoteSource`): YouTube/Chrome/Safari dahil her şey.
+/// Yedek: Müzik ve Spotify için AppleScript + dağıtık bildirim (adaptör yoksa veya çalışmazsa).
 @MainActor
 final class MediaController: ObservableObject {
     @Published private(set) var info: MediaInfo?
@@ -12,17 +13,117 @@ final class MediaController: ObservableObject {
     @Published private(set) var artworkColor: NSColor = .white
 
     private let bridge: AppleScriptBridge
+    private let remote: MediaRemoteSource
+    private var usingRemote = false
+    private var appleScriptStarted = false
     private var timer: Timer?
     private var artworkTrackID: String?
+    private var remoteArtworkLoaded = false
     private var lastRefresh: [MediaPlayer: MediaInfo] = [:]
     private var observers: [NSObjectProtocol] = []
+    private var bag = Set<AnyCancellable>()
 
     private static let playingPollInterval: TimeInterval = 3
     private static let idlePollInterval: TimeInterval = 8
     private static let artworkHosts: Set<String> = ["i.scdn.co", "mosaic.scdn.co", "image-cdn-ak.spotifycdn.com", "image-cdn-fa.spotifycdn.com"]
 
-    init(bridge: AppleScriptBridge = .shared) {
+    init(bridge: AppleScriptBridge = .shared, remote: MediaRemoteSource? = nil) {
         self.bridge = bridge
+        self.remote = remote ?? MediaRemoteSource()
+        if self.remote.isAvailable {
+            startRemote()
+        } else {
+            startAppleScript()
+        }
+    }
+
+    deinit {
+        observers.forEach { DistributedNotificationCenter.default().removeObserver($0) }
+        observers.forEach { NSWorkspace.shared.notificationCenter.removeObserver($0) }
+        timer?.invalidate()
+    }
+
+    var isPlaying: Bool { info?.isPlaying ?? false }
+
+    /// Uygulama kapanırken arka plan akışını durdur.
+    func shutdown() { remote.stop() }
+    /// Kaynak: "Sistem geneli" ya da "Müzik ve Spotify".
+    var sourceDescription: String { usingRemote ? "Sistem geneli (YouTube, tarayıcılar, tüm oynatıcılar)" : "Müzik ve Spotify" }
+
+    // MARK: - Kontroller
+
+    func playPause() {
+        guard let info else { return }
+        // Anında geri bildirim; gerçek durum akış/yoklama ile düzeltilir.
+        self.info = info.with(position: info.estimatedPosition(), isPlaying: !info.isPlaying)
+        if usingRemote { remote.send(.togglePlayPause) } else { sendScript(.playPause) }
+    }
+
+    func next() { usingRemote ? remote.send(.next) : sendScript(.next) }
+    func previous() { usingRemote ? remote.send(.previous) : sendScript(.previous) }
+
+    func seek(to seconds: TimeInterval) {
+        guard let info else { return }
+        self.info = info.with(position: seconds, isPlaying: info.isPlaying)
+        if usingRemote {
+            remote.seek(to: seconds)
+        } else if let player = info.player {
+            bridge.run(PlayerScripts.command(.seek(seconds), for: player), cacheable: false) { [weak self] _ in
+                self?.refresh(player)
+            }
+        }
+    }
+
+    func openPlayerApp() {
+        guard let bundleID = info?.appBundleID,
+              let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else { return }
+        NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+    }
+
+    // MARK: - Sistem geneli kaynak
+
+    private func startRemote() {
+        usingRemote = true
+        remote.$nowPlaying
+            .sink { [weak self] in self?.applyRemote($0) }
+            .store(in: &bag)
+        remote.$status
+            .filter { $0 == .failed }
+            .sink { [weak self] _ in
+                guard let self, self.usingRemote else { return }
+                self.usingRemote = false
+                self.apply(nil)
+                self.startAppleScript()
+            }
+            .store(in: &bag)
+        remote.start()
+    }
+
+    private func applyRemote(_ nowPlaying: RemoteNowPlaying?) {
+        guard usingRemote else { return }
+        guard let np = nowPlaying else { apply(nil); return }
+        let newInfo = MediaInfo(player: MediaPlayer(rawValue: np.bundleID), appBundleID: np.bundleID, trackID: np.trackID,
+                                title: np.title, artist: np.artist, album: np.album, duration: np.duration,
+                                position: np.duration > 0 ? min(np.elapsed, np.duration) : np.elapsed,
+                                isPlaying: np.isPlaying, capturedAt: np.timestamp)
+        if newInfo != info { info = newInfo }
+        if np.trackID != artworkTrackID {
+            artworkTrackID = np.trackID
+            remoteArtworkLoaded = false
+            setArtwork(nil, trackID: np.trackID)
+        }
+        // Kapak verisi genelde birkaç saniye sonra gelir.
+        if !remoteArtworkLoaded, let data = np.artworkData, let image = NSImage(data: data) {
+            remoteArtworkLoaded = true
+            setArtwork(image, trackID: np.trackID)
+        }
+    }
+
+    // MARK: - AppleScript yedeği (Müzik, Spotify)
+
+    private func startAppleScript() {
+        guard !appleScriptStarted else { return }
+        appleScriptStarted = true
         let distributed = DistributedNotificationCenter.default()
         for player in MediaPlayer.allCases {
             observers.append(distributed.addObserver(forName: player.changeNotification, object: nil, queue: .main) { [weak self] _ in
@@ -38,50 +139,12 @@ final class MediaController: ObservableObject {
         playersChanged()
     }
 
-    deinit {
-        observers.forEach { DistributedNotificationCenter.default().removeObserver($0) }
-        observers.forEach { NSWorkspace.shared.notificationCenter.removeObserver($0) }
-        timer?.invalidate()
-    }
-
-    var isPlaying: Bool { info?.isPlaying ?? false }
-
-    // MARK: - Kontroller
-
-    func playPause() { send(.playPause, optimisticToggle: true) }
-    func next() { send(.next) }
-    func previous() { send(.previous) }
-
-    func seek(to seconds: TimeInterval) {
-        guard let info else { return }
-        bridge.run(PlayerScripts.command(.seek(seconds), for: info.player), cacheable: false) { [weak self] _ in
-            self?.refresh(info.player)
-        }
-        self.info = MediaInfo(player: info.player, trackID: info.trackID, title: info.title, artist: info.artist,
-                              album: info.album, duration: info.duration, position: seconds,
-                              isPlaying: info.isPlaying, capturedAt: Date())
-    }
-
-    func openPlayerApp() {
-        guard let player = info?.player,
-              let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: player.bundleID) else { return }
-        NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
-    }
-
-    private func send(_ command: PlayerScripts.Command, optimisticToggle: Bool = false) {
-        guard let info, info.player.isRunning else { return }
-        if optimisticToggle {
-            // Anında geri bildirim; gerçek durum bildirim/yoklama ile düzeltilir.
-            self.info = MediaInfo(player: info.player, trackID: info.trackID, title: info.title, artist: info.artist,
-                                  album: info.album, duration: info.duration, position: info.estimatedPosition(),
-                                  isPlaying: !info.isPlaying, capturedAt: Date())
-        }
-        bridge.run(PlayerScripts.command(command, for: info.player)) { [weak self] _ in
-            self?.refresh(info.player)
+    private func sendScript(_ command: PlayerScripts.Command) {
+        guard let player = info?.player, player.isRunning else { return }
+        bridge.run(PlayerScripts.command(command, for: player)) { [weak self] _ in
+            self?.refresh(player)
         }
     }
-
-    // MARK: - Durum
 
     private func playersChanged() {
         let running = MediaPlayer.allCases.filter(\.isRunning)
@@ -112,6 +175,7 @@ final class MediaController: ObservableObject {
     }
 
     private func refresh(_ player: MediaPlayer) {
+        guard !usingRemote else { return }
         guard player.isRunning else {
             lastRefresh[player] = nil
             chooseActive()
@@ -145,18 +209,18 @@ final class MediaController: ObservableObject {
             artworkTrackID = nil
             return
         }
-        if newInfo.trackID != artworkTrackID {
+        if newInfo.trackID != artworkTrackID, let player = newInfo.player {
             artworkTrackID = newInfo.trackID
-            loadArtwork(for: newInfo)
+            loadArtwork(for: newInfo, player: player)
         }
     }
 
     // MARK: - Kapak
 
-    private func loadArtwork(for info: MediaInfo) {
-        bridge.run(PlayerScripts.artwork(for: info.player)) { [weak self] descriptor in
+    private func loadArtwork(for info: MediaInfo, player: MediaPlayer) {
+        bridge.run(PlayerScripts.artwork(for: player)) { [weak self] descriptor in
             guard let self, self.artworkTrackID == info.trackID, let descriptor else { return }
-            switch info.player {
+            switch player {
             case .music:
                 self.setArtwork(NSImage(data: descriptor.data), trackID: info.trackID)
             case .spotify:

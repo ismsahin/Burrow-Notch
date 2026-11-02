@@ -21,7 +21,7 @@ struct MediaPlayerView: View {
                     .animation(.spring(response: 0.35, dampingFraction: 0.7), value: info.isPlaying)
             }
             .buttonStyle(.plain)
-            .help("\(info.player.displayName) uygulamasını aç")
+            .help("\(AppIconCache.name(for: info.appBundleID)) uygulamasını aç")
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .top) {

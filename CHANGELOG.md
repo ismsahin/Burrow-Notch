@@ -4,6 +4,10 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/). Sürümler `1.
 
 ## [Yayınlanmamış]
 
+### Eklendi (v1.0.7)
+- **YouTube ve tarayıcı medyası**: Chrome, Safari, Arc vb. ve sistemdeki her oynatıcı (podcast, VLC…) kapak, ilerleme ve
+  kontrollerle çentikte. macOS 15.4+ kısıtı mediaremote-adapter (BSD-3) ile aşıldı; yoksa Müzik/Spotify yoluna düşer.
+
 ### Eklendi (v1.0.6)
 - **Bildirimler** (Tam Disk Erişimi ile): yeni bildirim önce büyük kart, sonra kapalı çentikte uygulama simgesi +
   okunmamış sayısı; "Bildirimler" sekmesinde son bildirimler, tıkla → uygulamayı aç.

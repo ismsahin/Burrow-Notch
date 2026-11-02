@@ -36,7 +36,7 @@ Betik son sürümü indirir, **SHA-256**, **kod imzası** ve **sabitlenmiş sert
 
 | | Özellik | Açıklama |
 |---|---|---|
-| 🎵 | **Çalan müzik** | Kapak, ilerleme çubuğu (sürükleyerek atla), oynat/duraklat/ileri/geri. Müzik ve Spotify. |
+| 🎵 | **Çalan müzik** | YouTube/Chrome/Safari dahil her oynatıcı: kapak, ilerleme çubuğu (sürükleyerek atla), oynat/duraklat/ileri/geri. |
 | 🌈 | **Kapak rengi ışıması** | Çalan şarkının kapak rengi çentiğe yayılır, ekolayzer çubukları o renkte dalgalanır. |
 | ✨ | **Canlı etkinlikler** | Çalan şarkı, indirme ilerlemesi, yaklaşan toplantı, zamanlayıcı; şarj, düşük pil, ses/parlaklık, cihaz bağlandı. |
 | 🔀 | **Çoklu etkinlik** | Aynı anda birkaçı varsa çentiğin üzerinde iki parmakla sağa/sola (fare tekerleğiyle yukarı/aşağı) kaydırarak geç. Öncelikli olanı sen seç. |
@@ -97,6 +97,11 @@ scripts/setup-github.sh           # depo adı varsayılan: burrow
 ```
 
 Mimari: [`docs/MIMARI.md`](docs/MIMARI.md) · Kararlar: [`docs/kararlar/`](docs/kararlar/) · Durum: [`DURUM.md`](DURUM.md)
+
+## Üçüncü taraf
+
+- [Sparkle](https://sparkle-project.org) — otomatik güncelleme (MIT)
+- [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) — sistem geneli "şu an çalan" (BSD-3, `Vendor/`)
 
 ## İlham
 

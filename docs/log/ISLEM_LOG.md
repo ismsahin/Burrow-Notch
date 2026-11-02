@@ -139,3 +139,17 @@ Her oturum sonunda en alta yeni kayıt ekle. **Eski kayıtları silme veya deği
 ## [009] 2026-11-02 — Otomatik güncelleme doğrulandı
 - v1.0.6 yayınlandı (Actions yeşil). Kullanıcının kurulu Burrow'u Sparkle ile kendiliğinden 1.0.3 → 1.0.5'e geçmiş
   (SULastCheckTime 18:23 UTC). Uçtan uca güncelleme hattı ilk kez gerçek kullanımda doğrulandı.
+
+## [010] 2026-11-02 — YouTube / tarayıcı medyası (mediaremote-adapter)
+- Yapan: Claude Code (Opus 5.5), kullanıcı onayıyla ("evet ekle")
+- Ne yapıldı: mediaremote-adapter v0.7.7 (BSD-3, commit e3ff502) kaynağı tarandı ve `Vendor/`'a alındı; clang ile
+  kaynaktan derleyen `scripts/build-mediaremote-adapter.sh`; Xcode postCompile aşaması framework + perl betiğini
+  uygulamaya koyuyor; `sign-app.sh` imzalıyor. `MediaRemoteSource` (stream JSON, diff birleştirme, komutlar, seek),
+  `MediaController` iki kaynaklı (sistem geneli → AppleScript yedeği), `MediaInfo.player` opsiyonel + `appBundleID`.
+- Bulunan/düzeltilen: `pkill`/SIGTERM'de kapanış kodu çalışmadığı için perl süreci sahipsiz kalıyordu → sinyal
+  yakalama + açılışta artık temizliği. Yerel imzada anahtar zinciri izin penceresi betiği bekletiyordu → yerelde
+  varsayılan ad-hoc (`BURROW_SIGN_IDENTITY` ile değiştirilebilir); yarıda kesilen imza Sparkle'ı bozmuştu, yeniden imzalandı.
+- Doğrulama: Chrome'da YouTube "Mabel Matiz - Umrumdışı" kapak, sanatçı ve ilerlemeyle açık çentikte (ekran görüntüsü).
+  106/106 test; testler sonrası artık süreç yok; Release imzası geçerli, imzalı adaptör çalışıyor.
+- Doğrulanmayan: oynat/duraklat/ileri/geri ve atlama komutlarının tarayıcıda gerçek etkisi (kullanıcının Mac'inde ses
+  çalmamak için denenmedi).
