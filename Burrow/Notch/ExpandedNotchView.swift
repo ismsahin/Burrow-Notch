@@ -26,7 +26,8 @@ struct ExpandedNotchView: View {
         VStack(spacing: 10) {
             header
             content
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .clipped()
         }
         .padding(.bottom, 14)
         .foregroundStyle(.white)

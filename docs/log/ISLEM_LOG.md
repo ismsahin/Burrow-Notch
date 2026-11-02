@@ -171,3 +171,11 @@ Her oturum sonunda en alta yeni kayıt ekle. **Eski kayıtları silme veya deği
 - Not: Bu sırada XProtect %355 CPU ile yeni ikilileri taradığı için test çalıştırıcı ve `swift` betiği takıldı; tarama bitince geçti.
   `debug-notch.sh` yerine `osascript -l JavaScript` ile dağıtık bildirim gönderilebilir.
 - Doğrulanmayan: anımsatıcı çipleri gerçek listelerle (Debug derlemesinin anımsatıcı izni yok).
+
+## [013] 2026-11-03 — Ana ekran taşma hatası
+- Kullanıcı: uygulamayı yeniden açınca ana sekmede içerik genişlikten taşıyor, başka sekmeye geçince düzeliyor.
+- Neden: 4 parçanın (müzik + takvim 160 + ayna + anımsatıcılar 170 + boşluklar) en küçük toplamı 620 pt açık çentiğe sığmıyordu;
+  taşan HStack üst bandı da genişletti.
+- Düzeltme: `HomeView.sideColumnWidth` (iki yan sütun varsa 118, tekse 160, müzik yoksa esnek), müzik en az 180 pt;
+  `ExpandedNotchView` içeriği `minWidth: 0` + `.clipped()`. Not: `layoutPriority` denendi, takvimi sıfıra ezdiği için bırakıldı.
+- Doğrulama: yeniden başlatıp ilk açılışta ekran görüntüsü (dört parça sığıyor, sekmeler/ayar görünür); testler.

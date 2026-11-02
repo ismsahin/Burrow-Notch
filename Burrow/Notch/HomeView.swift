@@ -18,6 +18,18 @@ struct HomeView: View {
     private var layout: [HomeWidget] { settings.homeLayout }
     private var hasMedia: Bool { layout.contains(.media) }
 
+    /// Takvim / anımsatıcı sütun genişliği. İkisi birden müzikle yan yanaysa daralır ki toplam çentiğe sığsın;
+    /// müzik yoksa kalan alanı paylaşırlar (`nil`).
+    private var sideColumnWidth: CGFloat? {
+        guard hasMedia else { return nil }
+        let sideCount = layout.filter { $0 == .calendar || $0 == .reminders }.count
+        return sideCount >= 2 ? Self.narrowSideWidth : Self.sideWidth
+    }
+    static let sideWidth: CGFloat = 160
+    static let narrowSideWidth: CGFloat = 118
+    /// Müzik çaların küçülebileceği en dar genişlik (kapak + kontroller).
+    static let minMediaWidth: CGFloat = 180
+
     private var isMirrorLarge: Bool {
         layout.contains(.mirror) && (mirror.state == .running || mirror.state == .starting)
     }
@@ -54,11 +66,13 @@ struct HomeView: View {
             media
         case .calendar:
             CalendarListView(service: services.calendar)
-                .frame(maxWidth: hasMedia ? 160 : .infinity)
+                .frame(width: sideColumnWidth)
+                .frame(maxWidth: sideColumnWidth == nil ? .infinity : nil)
                 .transition(.opacity)
         case .reminders:
             HomeRemindersView(service: services.reminders, settings: settings)
-                .frame(maxWidth: hasMedia ? 170 : .infinity, alignment: .leading)
+                .frame(width: sideColumnWidth, alignment: .leading)
+                .frame(maxWidth: sideColumnWidth == nil ? .infinity : nil, alignment: .leading)
                 .transition(.opacity)
         case .mirror:
             MirrorView(mirror: mirror, isLarge: false)
@@ -68,7 +82,8 @@ struct HomeView: View {
     }
 
     private var media: some View {
-        MediaPlayerView(media: services.media).frame(maxWidth: .infinity)
+        MediaPlayerView(media: services.media)
+            .frame(minWidth: Self.minMediaWidth, maxWidth: .infinity)
     }
 
     private var emptyHint: some View {

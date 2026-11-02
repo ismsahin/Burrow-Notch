@@ -4,6 +4,10 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/). Sürümler `1.
 
 ## [Yayınlanmamış]
 
+### Düzeltildi (v1.0.10)
+- Ana ekranda müzik + takvim + anımsatıcılar + ayna birlikteyken içerik çentikten taşıyor, sekmeler ve ayar düğmesi kesiliyordu.
+  Yan sütunlar ikisi birlikteyken 118 pt'ye daralıyor, içerik kırpılıyor.
+
 ### Eklendi / Değişti (v1.0.9)
 - **Ada köşeleri** ayarı: Yuvarlak (hap, 78 pt) ya da Köşeli (çentik gibi, 120 pt; 185'ten daraltıldı).
   Seçilmemişse büyük adada köşeli, küçük adada hap.
