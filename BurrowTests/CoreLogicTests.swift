@@ -88,13 +88,13 @@ final class DisplaySelectorTests: XCTestCase {
 
 final class ActivityResolverTests: XCTestCase {
     func test_noTransient_showsMediaWhenActive() {
-        XCTAssertEqual(ActivityResolver.resolve(transient: nil, isMediaActive: true), .media)
-        XCTAssertEqual(ActivityResolver.resolve(transient: nil, isMediaActive: false), .none)
+        XCTAssertEqual(ActivityResolver.resolve(transient: nil, persistent: .media), .media)
+        XCTAssertEqual(ActivityResolver.resolve(transient: nil, persistent: nil), .none)
     }
 
     func test_transientHUD_overridesMedia() {
         let hud = LiveActivity.hud(kind: .volume(muted: false), value: 0.5)
-        XCTAssertEqual(ActivityResolver.resolve(transient: hud, isMediaActive: true), hud)
+        XCTAssertEqual(ActivityResolver.resolve(transient: hud, persistent: .media), hud)
     }
 
     func test_sameKindUpdate_alwaysReplaces() {
@@ -105,7 +105,7 @@ final class ActivityResolverTests: XCTestCase {
 
     func test_lowerPriority_doesNotReplaceHigher() {
         let hud = LiveActivity.hud(kind: .brightness, value: 0.5)
-        let device = LiveActivity.device(name: "AirPods", connected: true)
+        let device = LiveActivity.device(name: "AirPods", connected: true, battery: nil)
         XCTAssertFalse(ActivityResolver.shouldReplace(current: hud, with: device))
         XCTAssertTrue(ActivityResolver.shouldReplace(current: device, with: hud))
     }

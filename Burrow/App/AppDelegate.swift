@@ -46,11 +46,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 guard let self, let command = note.object as? String else { return }
                 switch command {
                 case "toggle": self.controllers.values.first?.toggle()
+                case "toggleall": self.controllers.values.forEach { $0.toggle() }
                 case "shelf": self.controllers.values.first?.expand(tab: .shelf)
                 case "settings": self.openSettings()
                 case "hud": self.services.activity.show(.hud(kind: .volume(muted: false), value: 0.6))
                 case "charge": self.services.activity.show(.charging(percent: 76, isCharging: true))
-                case "device": self.services.activity.show(.device(name: "AirPods Pro", connected: true))
+                case "device": self.services.activity.show(.device(name: "AirPods Pro", connected: true, battery: nil))
+                case "airpods": self.services.activity.show(.device(name: "AirPods Pro", connected: true,
+                                                                    battery: DeviceBattery(left: 80, right: 76, caseLevel: 55)))
+                case "download": self.services.activity.update(.download, .download(name: "macOS.dmg", progress: 0.42, count: 2))
+                case "music": self.services.activity.update(.media, .media)
+                case "next": self.services.activity.step(by: 1)
+                case "timer": self.services.timer.start(minutes: 25)
+                case "cal": self.services.activity.update(.calendar, .calendar(title: "Ekip toplantısı", startsAt: Date().addingTimeInterval(12 * 60)))
+                case "done": self.services.activity.show(.notice(symbol: "checkmark.circle.fill", title: "İndirildi", detail: "macOS.dmg"))
+                case "clear":
+                    ActivityKind.allCases.forEach { self.services.activity.update($0, nil) }
+                    self.services.timer.cancel()
                 case "peek": self.controllers.values.forEach { $0.viewModel.setProximity(1) }
                 case "half": self.controllers.values.forEach { $0.viewModel.setProximity(0.5) }
                 case "rest": self.controllers.values.forEach { $0.viewModel.setProximity(0) }

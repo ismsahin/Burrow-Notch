@@ -13,3 +13,4 @@ ve eskisinin durumunu "Yerine geçti: NNNN" yap.
 | [0005](0005-kod-imzalama.md) | Kendinden imzalı sertifika (Developer ID yok) | Kabul |
 | [0006](0006-fare-takibi.md) | Sabit boyutlu panel + ignoresMouseEvents + küresel fare monitörü | Kabul |
 | [0007](0007-hud-degistirme.md) | Sistem HUD'unu değiştirme: CGEventTap, varsayılan kapalı | Kabul |
+| [0008](0008-etkinlik-dongusu-ve-kaynaklar.md) | Çoklu etkinlik döngüsü, indirme/kulaklık/takvim kaynakları, ada biçimi | Kabul |

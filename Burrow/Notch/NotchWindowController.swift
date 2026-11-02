@@ -53,6 +53,8 @@ final class NotchWindowController: NSObject {
     private static let dragActivationPadding: CGFloat = 40
     private static let collapseDelay: TimeInterval = 0.12
     private static let swipeThreshold: CGFloat = 50
+    private static let wheelStepInterval: TimeInterval = 0.3
+    private var lastWheelStep: TimeInterval = 0
 
     init(screen: NSScreen, services: AppServices) {
         self.screen = screen
@@ -103,11 +105,11 @@ final class NotchWindowController: NSObject {
 
     private var compactRect: CGRect {
         let size = viewModel.displayedCompactSize(for: viewModel.services.activity.current)
-        return viewModel.geometry.topCenteredRect(size: size, padding: Self.hoverPadding)
+        return viewModel.screenRect(size: size, padding: Self.hoverPadding)
     }
 
     private var expandedRect: CGRect {
-        viewModel.geometry.topCenteredRect(size: viewModel.expandedSize, padding: Self.hoverPadding)
+        viewModel.screenRect(size: viewModel.expandedSize, padding: Self.hoverPadding)
     }
 
     private var activeRect: CGRect { viewModel.isExpanded ? expandedRect : compactRect }
@@ -160,7 +162,7 @@ final class NotchWindowController: NSObject {
             viewModel.setProximity(0)
             return
         }
-        let rest = viewModel.geometry.topCenteredRect(size: viewModel.compactSize(for: viewModel.services.activity.current))
+        let rest = viewModel.screenRect(size: viewModel.compactSize(for: viewModel.services.activity.current))
         viewModel.setProximity(NotchGeometry.proximity(of: location, to: rest, radius: NotchViewModel.proximityRadius))
     }
 
@@ -205,7 +207,7 @@ final class NotchWindowController: NSObject {
             isFileDragging = true
         }
         guard isFileDragging, viewModel.services.settings.enableShelf else { return }
-        let zone = viewModel.geometry.topCenteredRect(
+        let zone = viewModel.screenRect(
             size: viewModel.isExpanded ? viewModel.expandedSize : viewModel.compactSize(for: viewModel.services.activity.current),
             padding: Self.dragActivationPadding
         )
@@ -217,25 +219,32 @@ final class NotchWindowController: NSObject {
 
     private func handleScroll(_ event: NSEvent) {
         guard viewModel.services.settings.swipeGestures else { return }
+        // Klasik fare tekerleği (hassas delta yok, faz yok): kapalıyken etkinlikler arasında geç.
+        if !event.hasPreciseScrollingDeltas {
+            handleMouseWheel(event)
+            return
+        }
+        // Parmak kalktıktan sonraki atalet (momentum) olayları ikinci bir adım tetiklemesin.
+        if event.momentumPhase != [] { return }
         if event.phase == .began || event.phase == .mayBegin {
             scrollAccumulator = .zero
             scrollHandled = false
         }
         guard !scrollHandled else {
-            if event.phase == .ended || event.phase == .cancelled { scrollHandled = false }
+            if event.phase == .ended || event.phase == .cancelled {
+                scrollHandled = false
+                scrollAccumulator = .zero
+            }
             return
         }
         scrollAccumulator.width += event.scrollingDeltaX
         scrollAccumulator.height += event.scrollingDeltaY
-        let media = viewModel.services.media
 
         if abs(scrollAccumulator.width) > Self.swipeThreshold, abs(scrollAccumulator.width) > abs(scrollAccumulator.height) {
             scrollHandled = true
-            guard media.info != nil else { return }
-            // Doğal kaydırmada sola kaydırma deltaX < 0 → sonraki parça
+            // Doğal kaydırmada sola kaydırma deltaX < 0 → sonraki
             let towardsNext = event.isDirectionInvertedFromDevice ? scrollAccumulator.width < 0 : scrollAccumulator.width > 0
-            towardsNext ? media.next() : media.previous()
-            haptic()
+            handleHorizontalSwipe(towardsNext: towardsNext)
         } else if abs(scrollAccumulator.height) > Self.swipeThreshold {
             scrollHandled = true
             let down = event.isDirectionInvertedFromDevice ? scrollAccumulator.height > 0 : scrollAccumulator.height < 0
@@ -246,6 +255,27 @@ final class NotchWindowController: NSObject {
             scrollAccumulator = .zero
             scrollHandled = false
         }
+    }
+
+    /// Kapalıyken: birden çok etkinlik varsa aralarında geç; tek etkinlik müzikse şarkı değiştir.
+    /// Açıkken (Ana sekmede): şarkı değiştir.
+    private func handleHorizontalSwipe(towardsNext: Bool) {
+        let services = viewModel.services
+        if !viewModel.isExpanded, services.activity.step(by: towardsNext ? 1 : -1) {
+            haptic()
+            return
+        }
+        guard services.media.info != nil, viewModel.isExpanded ? viewModel.tab == .home : services.activity.current == .media else { return }
+        towardsNext ? services.media.next() : services.media.previous()
+        haptic()
+    }
+
+    private func handleMouseWheel(_ event: NSEvent) {
+        guard !viewModel.isExpanded, abs(event.scrollingDeltaY) > 0.5 else { return }
+        let now = ProcessInfo.processInfo.systemUptime
+        guard now - lastWheelStep > Self.wheelStepInterval else { return }
+        lastWheelStep = now
+        if viewModel.services.activity.step(by: event.scrollingDeltaY < 0 ? 1 : -1) { haptic() }
     }
 
     // MARK: - Durum değişimleri

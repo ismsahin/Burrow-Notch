@@ -29,6 +29,26 @@ enum DisplayMode: String, CaseIterable, Identifiable {
     }
 }
 
+/// Çentiksiz ekranlarda (harici monitör vb.) görünüm.
+enum NotchlessStyle: String, CaseIterable, Identifiable {
+    /// Menü çubuğuna yapışık sanal çentik.
+    case notch
+    /// iPhone'daki gibi tepeden biraz aşağıda yüzen hap (Dynamic Island).
+    case island
+    var id: String { rawValue }
+    var title: String { self == .notch ? "Sanal çentik" : "Dynamic Island (hap)" }
+}
+
+/// Ses/parlaklık göstergesinin biçimi.
+enum HUDStyle: String, CaseIterable, Identifiable {
+    /// Çentiğin iki yanında ince çubuk.
+    case compact
+    /// Çentik aşağı uzar: simge + kalın çubuk + yüzde.
+    case large
+    var id: String { rawValue }
+    var title: String { self == .compact ? "Kompakt" : "Büyük" }
+}
+
 /// Tüm kullanıcı tercihleri. UserDefaults'a yazılır; test için farklı suite verilebilir.
 final class AppSettings: ObservableObject {
     static let shared = AppSettings()
@@ -53,6 +73,14 @@ final class AppSettings: ObservableObject {
         static let swipeGestures = "swipeGestures"
         static let albumTint = "albumTint"
         static let lowBatteryThreshold = "lowBatteryThreshold"
+        static let notchlessStyle = "notchlessStyle"
+        static let notchOutline = "notchOutline"
+        static let hudStyle = "hudStyle"
+        static let preferredActivity = "preferredActivity"
+        static let showDownloadActivity = "showDownloadActivity"
+        static let showCalendarActivity = "showCalendarActivity"
+        static let calendarLeadMinutes = "calendarLeadMinutes"
+        static let showDeviceBattery = "showDeviceBattery"
     }
 
     private let defaults: UserDefaults
@@ -73,6 +101,17 @@ final class AppSettings: ObservableObject {
     @Published var swipeGestures: Bool { didSet { defaults.set(swipeGestures, forKey: Key.swipeGestures) } }
     @Published var albumTint: Bool { didSet { defaults.set(albumTint, forKey: Key.albumTint) } }
     @Published var lowBatteryThreshold: Int { didSet { defaults.set(lowBatteryThreshold, forKey: Key.lowBatteryThreshold) } }
+    @Published var notchlessStyle: NotchlessStyle { didSet { defaults.set(notchlessStyle.rawValue, forKey: Key.notchlessStyle) } }
+    @Published var notchOutline: Bool { didSet { defaults.set(notchOutline, forKey: Key.notchOutline) } }
+    @Published var hudStyle: HUDStyle { didSet { defaults.set(hudStyle.rawValue, forKey: Key.hudStyle) } }
+    /// Birden fazla etkinlik varken varsayılan olarak gösterilecek. `nil` = Otomatik (en son başlayan).
+    @Published var preferredActivity: ActivityKind? {
+        didSet { defaults.set(preferredActivity?.rawValue ?? "auto", forKey: Key.preferredActivity) }
+    }
+    @Published var showDownloadActivity: Bool { didSet { defaults.set(showDownloadActivity, forKey: Key.showDownloadActivity) } }
+    @Published var showCalendarActivity: Bool { didSet { defaults.set(showCalendarActivity, forKey: Key.showCalendarActivity) } }
+    @Published var calendarLeadMinutes: Int { didSet { defaults.set(calendarLeadMinutes, forKey: Key.calendarLeadMinutes) } }
+    @Published var showDeviceBattery: Bool { didSet { defaults.set(showDeviceBattery, forKey: Key.showDeviceBattery) } }
 
     static let defaultValues: [String: Any] = [
         Key.proximityEffect: true,
@@ -89,6 +128,14 @@ final class AppSettings: ObservableObject {
         Key.swipeGestures: true,
         Key.albumTint: true,
         Key.lowBatteryThreshold: 20,
+        Key.notchlessStyle: NotchlessStyle.notch.rawValue,
+        Key.notchOutline: false,
+        Key.hudStyle: HUDStyle.compact.rawValue,
+        Key.preferredActivity: "auto",
+        Key.showDownloadActivity: true,
+        Key.showCalendarActivity: true,
+        Key.calendarLeadMinutes: 15,
+        Key.showDeviceBattery: true,
     ]
 
     init(defaults: UserDefaults = .standard) {
@@ -110,6 +157,14 @@ final class AppSettings: ObservableObject {
         swipeGestures = defaults.bool(forKey: Key.swipeGestures)
         albumTint = defaults.bool(forKey: Key.albumTint)
         lowBatteryThreshold = min(50, max(5, defaults.integer(forKey: Key.lowBatteryThreshold)))
+        notchlessStyle = NotchlessStyle(rawValue: defaults.string(forKey: Key.notchlessStyle) ?? "") ?? .notch
+        notchOutline = defaults.bool(forKey: Key.notchOutline)
+        hudStyle = HUDStyle(rawValue: defaults.string(forKey: Key.hudStyle) ?? "") ?? .compact
+        preferredActivity = ActivityKind(rawValue: defaults.string(forKey: Key.preferredActivity) ?? "")
+        showDownloadActivity = defaults.bool(forKey: Key.showDownloadActivity)
+        showCalendarActivity = defaults.bool(forKey: Key.showCalendarActivity)
+        calendarLeadMinutes = min(60, max(5, defaults.integer(forKey: Key.calendarLeadMinutes)))
+        showDeviceBattery = defaults.bool(forKey: Key.showDeviceBattery)
     }
 
     /// v1.0.3'teki "Üzerine gelince aç" anahtarı kapalıysa tıklama moduna taşınır.

@@ -4,6 +4,17 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/). Sürümler `1.
 
 ## [Yayınlanmamış]
 
+### Eklendi (v1.0.5)
+- **Çoklu canlı etkinlik**: müzik, indirme, yaklaşan takvim etkinliği ve zamanlayıcı aynı anda; kapalı çentikte iki
+  parmakla sağa/sola (fare tekerleğiyle yukarı/aşağı) kaydırarak geçiş, sayfa noktaları.
+- **Öncelikli etkinlik seçimi**: Otomatik (en son başlayan) ya da müzik / indirme / takvim / zamanlayıcı.
+- **İndirmeler**: Safari ve Chrome indirmelerinin ilerlemesi (yüzde + halka), bitince "İndirildi" bildirimi.
+- **Yaklaşan takvim etkinliği**: başlamadan 5–60 dk önce geri sayım.
+- **Kulaklık/cihaz pili**: AirPods sol/sağ/kutu, diğer cihazlarda tek düzey; bağlanınca ve açık çentikte.
+- **Zamanlayıcı**: "Süre" sekmesi, hazır süreler (1–45 dk) + özel süre, +1 dk, bitince ses.
+- **Dynamic Island (hap) biçimi** çentiksiz ekranlar için (isteğe bağlı); **çentik dış çizgisi**.
+- **Büyük HUD** biçimi ve HUD'da yay aşma efekti.
+
 ### Eklendi (v1.0.4)
 - **Yaklaşınca büyü** (Alcove efekti): imleç çentiğe yaklaştıkça çentik yumuşakça kabarır. Ayarlardan kapatılabilir.
 - **Açılma biçimi**: "Üzerinde bekleyince" (bekleme süresi 0–1,5 sn ayarlanabilir) veya "Tıklayınca".

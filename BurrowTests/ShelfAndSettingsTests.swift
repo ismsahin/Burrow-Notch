@@ -71,6 +71,10 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertEqual(settings.openMode, .hover)
         XCTAssertTrue(settings.proximityEffect)
         XCTAssertEqual(settings.displayMode, .notched)
+        XCTAssertEqual(settings.notchlessStyle, .notch, "Varsayılan görünüm değişmez; ada isteğe bağlı")
+        XCTAssertEqual(settings.hudStyle, .compact)
+        XCTAssertNil(settings.preferredActivity, "Varsayılan: Otomatik")
+        XCTAssertEqual(settings.calendarLeadMinutes, 15)
         XCTAssertFalse(settings.replaceSystemHUD, "Erişilebilirlik isteyen özellik varsayılan kapalı olmalı")
         XCTAssertEqual(settings.lowBatteryThreshold, 20)
 

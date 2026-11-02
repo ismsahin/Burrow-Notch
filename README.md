@@ -38,8 +38,13 @@ Betik son sürümü indirir, **SHA-256**, **kod imzası** ve **sabitlenmiş sert
 |---|---|---|
 | 🎵 | **Çalan müzik** | Kapak, ilerleme çubuğu (sürükleyerek atla), oynat/duraklat/ileri/geri. Müzik ve Spotify. |
 | 🌈 | **Kapak rengi ışıması** | Çalan şarkının kapak rengi çentiğe yayılır, ekolayzer çubukları o renkte dalgalanır. |
-| ✨ | **Canlı etkinlikler** | Kapalı çentiğin iki yanında: çalan şarkı, şarj takıldı, düşük pil, ses/parlaklık, Bluetooth cihaz bağlandı. |
-| 👆 | **Kaydırma hareketleri** | İki parmakla yatay kaydır → sonraki/önceki şarkı. Aşağı kaydır → aç, yukarı → kapat. |
+| ✨ | **Canlı etkinlikler** | Çalan şarkı, indirme ilerlemesi, yaklaşan toplantı, zamanlayıcı; şarj, düşük pil, ses/parlaklık, cihaz bağlandı. |
+| 🔀 | **Çoklu etkinlik** | Aynı anda birkaçı varsa çentiğin üzerinde iki parmakla sağa/sola (fare tekerleğiyle yukarı/aşağı) kaydırarak geç. Öncelikli olanı sen seç. |
+| 🎧 | **Kulaklık pili** | AirPods bağlanınca sol/sağ/kutu pil düzeyi; açık çentikte kulaklık simgesiyle. |
+| ⏱ | **Zamanlayıcı** | Süre sekmesinden 1–45 dk ya da özel süre; kalan süre kapalı çentikte, bitince ses. |
+| 💊 | **Dynamic Island** | Çentiksiz ekranlarda (harici monitör) menü çubuğunda yüzen hap biçimi — isteğe bağlı. |
+| 🧲 | **Yaklaşınca büyü** | İmleç yaklaştıkça çentik yumuşakça kabarır; üzerinde bekleyince ya da tıklayınca açılır (ayarlanabilir). |
+| 👆 | **Kaydırma hareketleri** | Açık çentikte yatay → şarkı değiştir. Aşağı kaydır → aç, yukarı → kapat. |
 | 🔊 | **Yeni HUD** | macOS'un ortadaki ses/parlaklık göstergesi yerine çentikte zarif bir çubuk (isteğe bağlı). |
 | 📅 | **Takvim** | Bugün ve yarının yaklaşan etkinlikleri. |
 | 🗂 | **Dosya rafı** | Dosyayı çentiğe sürükle-bırak, sonra istediğin yere sürükle. AirDrop ile tek tıkla paylaş. |

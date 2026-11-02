@@ -91,3 +91,25 @@ Her oturum sonunda en alta yeni kayıt ekle. **Eski kayıtları silme veya deği
   - `applicationShouldHandleReopen` → ayarlar. Ayarlar penceresi `orderFrontRegardless` ile öne alınıyor (hata düzeltmesi).
   - DEBUG kancasına `peek|half|rest`.
 - Doğrulama: 47/47 test. Ekran görüntüsü: dinlenme/yarı/tam yakınlık kabarması ve yeni Genel ayarları.
+
+## [007] 2026-11-02 — Alcove eşitliği: çoklu etkinlik, ada, kulaklık pili, indirme, zamanlayıcı
+- Yapan: Claude Code (Opus 5.5)
+- Araştırma: tryalcove.com ana sayfa + changelog başlıkları + SSS (JS paketinden), Medium röportajı, Seam karşılaştırması.
+  Bulgular `docs/referanslar/README.md`'de.
+- Ne yapıldı: `ActivityCarousel` (saf), `ActivityCenter` yeniden yazıldı (kalıcı/geçici), `DownloadMonitor` (NSProgress),
+  `TimerService` + "Süre" sekmesi, `DeviceBatteryReader` (system_profiler), takvim yaklaşan etkinlik, `notice` geçici
+  etkinliği, ada biçimi (menü çubuğu içinde), büyük HUD, dış çizgi, kaydırma/fare tekerleği ile geçiş, sayfa noktaları,
+  ayarlar (Genel › Ekran, Etkinlikler › Birden Fazla Etkinlik, HUD › biçim). Karar 0008.
+- Doğrulama: 77/77 test. Ekran görüntüleri: müzik+indirme+zamanlayıcı döngüsü ve noktalar, AirPods pili, "İndirildi",
+  büyük HUD, LG'de ada (kapalı/açık). İlk denemede ada menü çubuğundan taşıyordu → menü çubuğu içine sığdırıldı.
+  AirPods satırı kesiliyordu → genişletildi.
+- Doğrulanmayan: gerçek AirPods pil anahtarları (şu an bağlı cihaz yok; topluluk anahtar adları kullanıldı),
+  gerçek Safari/Chrome indirmesi, gerçek trackpad kaydırması.
+- Not: Ekran görüntüsü için `notchlessStyle/hudStyle/displayMode` geçici yazıldı, sonra silinerek eski hâline döndürüldü.
+- Kod incelemesi (code-reviewer alt ajanı) 6 bulgu, hepsi düzeltildi (+3 test → 80/80):
+  1. `Progress.addSubscriber` işleyicileri ana iş parçacığı dışında gelebilir → `assumeIsolated` çökebilirdi; ana kuyruğa geçiş.
+  2. Trackpad atalet (momentum) olayları tek kaydırmada iki adım atlatıyordu → momentum yok sayılıyor.
+  3. Adada ekranın en üst 2–3 pt'si isabet alanı dışındaydı → `screenRect` tepeye kadar uzatıldı.
+  4. Zamanlayıcı Mac uykudayken duruyordu (monoton saat) → `wallDeadline`.
+  5. Tercihi "Otomatik"e çevirmek ekranı zıplatıyordu → mevcut/elle seçim korunuyor.
+  6. "+1 dk" zamanlayıcıyı bitip yeniden başlamış gibi gösteriyordu → `endsAt` hiç nil olmadan uzatılıyor.

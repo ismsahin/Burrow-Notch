@@ -57,6 +57,15 @@ struct SettingsView: View {
                 }
                 Text(displayHint)
                     .font(.caption).foregroundStyle(.secondary)
+                Picker("Çentiksiz ekranlarda", selection: $settings.notchlessStyle) {
+                    ForEach(NotchlessStyle.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                Text(settings.notchlessStyle == .island
+                     ? "Harici monitör gibi çentiksiz ekranlarda menü çubuğunun hemen altında yüzen yuvarlak hap (iPhone Dynamic Island)."
+                     : "Çentiksiz ekranlarda menü çubuğuna yapışık sanal çentik çizilir.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Toggle("Çentik dış çizgisi", isOn: $settings.notchOutline)
             }
         }
         .formStyle(.grouped)
@@ -78,7 +87,23 @@ struct SettingsView: View {
                 if settings.showBatteryActivity {
                     Stepper("Düşük pil eşiği: %\(settings.lowBatteryThreshold)", value: $settings.lowBatteryThreshold, in: 5...50, step: 5)
                 }
+                Toggle("İndirmeler (Safari, Chrome)", isOn: $settings.showDownloadActivity)
+                Toggle("Yaklaşan takvim etkinliği", isOn: $settings.showCalendarActivity)
+                if settings.showCalendarActivity {
+                    Stepper("Başlamadan \(settings.calendarLeadMinutes) dk önce göster", value: $settings.calendarLeadMinutes, in: 5...60, step: 5)
+                }
                 Toggle("Bluetooth cihaz bağlantıları", isOn: $settings.showDeviceActivity)
+                if settings.showDeviceActivity {
+                    Toggle("Kulaklık / cihaz pilini göster (AirPods vb.)", isOn: $settings.showDeviceBattery)
+                }
+            }
+            Section("Birden Fazla Etkinlik") {
+                Picker("Öncelikli göster", selection: $settings.preferredActivity) {
+                    Text("Otomatik (en son başlayan)").tag(ActivityKind?.none)
+                    ForEach(ActivityKind.allCases) { Text($0.title).tag(ActivityKind?.some($0)) }
+                }
+                Text("Aynı anda örneğin müzik çalıp bir şey iniyorsa kapalı çentikte bu gösterilir. Çentiğin üzerindeyken iki parmakla sağa/sola kaydırarak (fare tekerleğiyle yukarı/aşağı) diğerlerine geçebilirsin; sağ alttaki noktalar kaç etkinlik olduğunu gösterir.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
             Section("Açık Çentik") {
                 Toggle("Takvim", isOn: $settings.showCalendar)
@@ -94,6 +119,12 @@ struct SettingsView: View {
         Form {
             Section("Ses ve Parlaklık") {
                 Toggle("Ses değişince çentikte göster", isOn: $settings.showVolumeChanges)
+                Picker("Gösterge biçimi", selection: $settings.hudStyle) {
+                    ForEach(HUDStyle.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                Text(settings.hudStyle == .large ? "Çentik aşağı uzar: simge, kalın çubuk ve yüzde." : "Çentiğin iki yanında ince çubuk.")
+                    .font(.caption).foregroundStyle(.secondary)
                 Toggle("Sistem HUD'unu Burrow ile değiştir", isOn: $settings.replaceSystemHUD)
                 Text("Ses/parlaklık tuşlarını yakalar, macOS'un ortadaki göstergesi yerine çentikte şık bir çubuk gösterir. Erişilebilirlik izni gerekir. Burrow kapanırsa tuşlar normale döner.")
                     .font(.caption).foregroundStyle(.secondary)

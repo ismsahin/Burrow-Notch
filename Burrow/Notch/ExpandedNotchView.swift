@@ -44,14 +44,13 @@ struct ExpandedNotchView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            if settings.enableShelf {
-                ForEach(NotchTab.allCases) { tab in
+            ForEach(visibleTabs) { tab in
                     TabButton(tab: tab, isSelected: viewModel.tab == tab, badge: tab == .shelf ? shelf.items.count : 0) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { viewModel.tab = tab }
                     }
-                }
             }
-            Spacer(minLength: viewModel.geometry.notchSize.width + 16)
+            Spacer(minLength: viewModel.isIsland ? 16 : viewModel.geometry.notchSize.width + 16)
+            DeviceBatteryHeader(services: services)
             BatteryHeader(battery: services.battery)
             IconButton(symbol: "gearshape.fill", help: "Ayarlar") {
                 viewModel.collapse()
@@ -61,14 +60,21 @@ struct ExpandedNotchView: View {
         .frame(height: max(24, viewModel.geometry.notchSize.height))
     }
 
+    private var visibleTabs: [NotchTab] {
+        NotchTab.allCases.filter { $0 != .shelf || settings.enableShelf }
+    }
+
     @ViewBuilder
     private var content: some View {
-        switch settings.enableShelf ? viewModel.tab : .home {
+        switch visibleTabs.contains(viewModel.tab) ? viewModel.tab : .home {
         case .home:
             HomeView(viewModel: viewModel, services: services)
                 .transition(.opacity.combined(with: .move(edge: .leading)))
         case .shelf:
             ShelfView(store: services.shelf, isTargeted: viewModel.isDropTargeted)
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
+        case .timer:
+            TimerView(timer: services.timer)
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
         }
     }
@@ -120,6 +126,29 @@ struct IconButton: View {
         .buttonStyle(.plain)
         .onHover { isHovering = $0 }
         .help(help)
+    }
+}
+
+/// Bağlı kulaklık vb. cihazların pil özeti (en düşük kulaklık düzeyi), üzerine gelince ayrıntı.
+private struct DeviceBatteryHeader: View {
+    @ObservedObject var services: AppServices
+
+    var body: some View {
+        let devices = services.deviceBatteries.sorted { $0.key < $1.key }
+        if services.settings.showDeviceBattery, !devices.isEmpty {
+            HStack(spacing: 8) {
+                ForEach(devices.prefix(2), id: \.key) { name, battery in
+                    HStack(spacing: 3) {
+                        Image(systemName: DeviceSymbol.name(for: name)).font(.system(size: 11, weight: .semibold))
+                        if let level = battery.lowest ?? battery.caseLevel {
+                            Text("%\(level)").font(.system(size: 11, weight: .semibold).monospacedDigit())
+                        }
+                    }
+                    .foregroundStyle((battery.lowest ?? 100) <= 20 ? .red : .white.opacity(0.8))
+                    .help("\(name): \(battery.summary)")
+                }
+            }
+        }
     }
 }
 

@@ -77,6 +77,16 @@ final class CalendarService: ObservableObject {
         }
     }
 
+    /// Saf: yaklaşan (tüm gün olmayan) ilk etkinlik — başlamasına `lead` dakika kalmışsa ya da 5 dakikadan az önce başladıysa.
+    nonisolated static func upcoming(in items: [CalendarItem], now: Date, leadMinutes: Int) -> CalendarItem? {
+        let window = TimeInterval(leadMinutes * 60)
+        let grace: TimeInterval = 5 * 60
+        return items
+            .filter { !$0.isAllDay && $0.end > now }
+            .filter { $0.start.timeIntervalSince(now) <= window && now.timeIntervalSince($0.start) <= grace }
+            .min { $0.start < $1.start }
+    }
+
     func openCalendarApp() {
         if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.iCal") {
             NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())

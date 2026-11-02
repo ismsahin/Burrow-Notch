@@ -22,6 +22,8 @@ Depo public, secret'lar kurulu, release hattı uçtan uca yeşil (test → derle
 - [x] Ayarlar penceresi (5 sekme), menü çubuğu simgesi, girişte başlat
 - [x] Sparkle 2 + release.yml (test → derle → imzala → EdDSA → appcast → Release)
 - [x] install.sh (SHA-256 + codesign + sabitlenmiş sertifika parmak izi)
+- [x] v1.0.5: çoklu etkinlik + kaydırarak geçiş, öncelik seçimi, indirme, takvim geri sayımı, kulaklık pili,
+      zamanlayıcı, ada (hap) biçimi, büyük HUD, dış çizgi (karar 0008)
 - [x] v1.0.4: yaklaşınca büyü efekti, açılma biçimi (bekleme/tıklama + süre), ekran seçimi (çentikli/ana/tümü)
 - [x] Burrow.dmg: sürükle-bırak penceresi (açık arka plan, ok, Applications kısayolu); release.yml'e eklendi
 - [x] Kod incelemesi: 10 bulgu düzeltildi (bkz. ISLEM_LOG kayıt 3)
@@ -32,7 +34,8 @@ Depo public, secret'lar kurulu, release hattı uçtan uca yeşil (test → derle
   mantık birim testli, görünüm `scripts/debug-notch.sh` ile doğrulandı)
 - Müzik/Spotify çalarken uçtan uca (betikler gerçek AppleScript derleyicisinde derleniyor, ayrıştırıcı testli)
 - Medya tuşu yakalama, parlaklık, kamera, takvim izin akışları
-- Kurulu bir sürümün Sparkle ile bir sonrakine kendiliğinden güncellenmesi (ikinci sürümde görülecek)
+- Kurulu bir sürümün Sparkle ile bir sonrakine kendiliğinden güncellenmesi (1.0.3 kurulu; saatlik kontrol bekleniyor)
+- AirPods pil anahtarları gerçek cihazla; Safari/Chrome indirme ilerlemesi gerçek indirmeyle
 
 ## Bilinen sınırlar
 - Tarayıcı medyası (YouTube vb.) görünmez → karar 0003

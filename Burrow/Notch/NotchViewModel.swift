@@ -2,13 +2,14 @@ import AppKit
 import Combine
 
 enum NotchTab: String, CaseIterable, Identifiable {
-    case home, shelf
+    case home, shelf, timer
     var id: String { rawValue }
 
     var title: String {
         switch self {
         case .home: return "Ana"
         case .shelf: return "Raf"
+        case .timer: return "Süre"
         }
     }
 
@@ -16,6 +17,7 @@ enum NotchTab: String, CaseIterable, Identifiable {
         switch self {
         case .home: return "house.fill"
         case .shelf: return "tray.full.fill"
+        case .timer: return "timer"
         }
     }
 }
@@ -60,12 +62,49 @@ final class NotchViewModel: ObservableObject {
     var topRadius: CGFloat { isExpanded ? Self.expandedTopRadius : Self.topRadius }
     var bottomRadius: CGFloat { isExpanded ? 28 : 10 }
 
+    // MARK: - Ada (Dynamic Island) biçimi
+
+    /// Çentiksiz ekranda "hap" biçimi seçiliyse true.
+    var isIsland: Bool { !geometry.hasPhysicalNotch && services.settings.notchlessStyle == .island }
+    /// Ada menü çubuğunun içinde dikey ortalı yüzer (altındaki pencerelerin üstüne taşmaz).
+    var topInset: CGFloat { isIsland ? max(2, (geometry.notchSize.height - islandHeight) / 2) : 0 }
+    /// Menü çubuğundan biraz kısa hap.
+    var islandHeight: CGFloat { max(Self.minIslandHeight, geometry.notchSize.height - Self.islandMenuBarMargin) }
+    static let minIslandHeight: CGFloat = 18
+    static let islandMenuBarMargin: CGFloat = 5
+    /// Adanın ortası (kamera yok, daha dar): boşken küçük bir hap.
+    static let islandCenterWidth: CGFloat = 78
+    /// Büyük HUD'da çentiğin altına eklenen yükseklik.
+    static let largeHUDExtraHeight: CGFloat = 34
+
+    /// Ortadaki boş alan (fiziksel çentik / ada gövdesi) genişliği.
+    var centerWidth: CGFloat { isIsland ? Self.islandCenterWidth : geometry.notchSize.width }
+    /// Kapalı hâlin ilk satır yüksekliği (çentik ya da ada).
+    var barHeight: CGFloat { isIsland ? islandHeight : geometry.notchSize.height }
+
+    func isLargeHUD(_ activity: LiveActivity) -> Bool {
+        if case .hud = activity { return services.settings.hudStyle == .large }
+        return false
+    }
+
     /// Kapalı hâlde dinlenme boyutu (çentik + canlı etkinlik payı + şekil kıvrımları). İsabet alanı bundan hesaplanır.
     func compactSize(for activity: LiveActivity) -> CGSize {
-        CGSize(
-            width: geometry.notchSize.width + activity.extraWidth + Self.topRadius * 2,
-            height: geometry.notchSize.height
+        let large = isLargeHUD(activity)
+        let extra = large ? 120 : activity.extraWidth
+        let sidePadding = isIsland ? islandHeight * 0.5 : Self.topRadius * 2
+        return CGSize(
+            width: centerWidth + extra + sidePadding,
+            height: barHeight + (large ? Self.largeHUDExtraHeight : 0)
         )
+    }
+
+    /// Ekran koordinatında, üst kenara (ve adada üst boşluğa) göre hizalı dikdörtgen.
+    /// Adada üstteki boşluk da dahil edilir: imleci ekranın en tepesine itmek de adayı yakalar (Fitts yasası).
+    func screenRect(size: CGSize, padding: CGFloat = 0) -> CGRect {
+        var rect = geometry.topCenteredRect(size: size, padding: padding)
+        rect.origin.y -= topInset
+        rect.size.height += topInset
+        return rect
     }
 
     /// Çizilen boyut: dinlenme boyutu + yakınlık kabarması.
