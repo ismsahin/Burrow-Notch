@@ -67,3 +67,12 @@ Her oturum sonunda en alta yeni kayıt ekle. **Eski kayıtları silme veya deği
   imza doğrulamasını geçti ve açıldı; disk çıkarıldı. sign_update stdin + appcast zinciri geçici ed25519 anahtarla denendi.
   36/36 test, iş akışı YAML geçerli.
 - Sıradaki: kullanıcı `gh auth login && scripts/setup-github.sh`.
+
+## [005] 2026-11-02 — GitHub kurulumu ve ilk sürüm
+- Yapan: Claude Code (Opus 5.5) + kullanıcı (`gh auth login`, public onayı)
+- Ne yapıldı: setup-github.sh iki hatası düzeltildi (`-resolvePackageDependencies` için `-scheme` eksikti; yer tutucu
+  bulunamayınca `grep` + `pipefail` betiği kesiyordu). Secret'lar ve değişken yüklendi, sertifika yerel anahtar zincirine
+  eklendi, install.sh'e parmak izi sabitlendi (`2146be3c…`).
+- Doğrulama: Release çalıştırması 41494067895 yeşil → v1.0.3. İndirilen DMG: SHA-256 OK, `codesign --strict` OK,
+  Authority=Burrow Self-Signed, SUFeedURL doğru, Applications kısayolu var. Tüm varlıklar `latest/download` ile 200.
+- Not: Kullanıcının gördüğü 404, sürüm yüklenmeden önce denendiği içindi.

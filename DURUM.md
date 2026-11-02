@@ -5,18 +5,12 @@
 ## Özet
 v1 kodu tamamlandı, derleniyor ve 36/36 birim testi geçiyor. Release derlemesi imzalanıyor ve açılıyor. Kapalı/açık çentik,
 canlı etkinlikler, raf ve ayarlar dahili Retina ekranda **ekran görüntüsüyle doğrulandı** (`docs/ornekler/ekran-goruntuleri/`).
-Kod **GitHub'a yüklendi**: `ismsahin/Burrow-Notch` (şu an **private**). Sürükle-bırak DMG kurulumu eklendi.
-Güncelleme anahtarları ve imza sertifikası henüz GitHub'a eklenmedi; bu yüzden Release iş akışı "gizli anahtar yok"
-adımında bilerek durur.
+**İlk sürüm yayında: v1.0.3** — https://github.com/ismsahin/Burrow-Notch/releases/latest
+Depo public, secret'lar kurulu, release hattı uçtan uca yeşil (test → derle → self-signed imza → DMG → EdDSA → appcast).
 
-## ⏭ Sıradaki adım (kullanıcı yapacak)
-```bash
-gh auth login                    # GitHub.com → HTTPS → tarayıcıyla giriş
-scripts/setup-github.sh          # Burrow-Notch: public yapma onayı + anahtarlar + sertifika + push → ilk sürüm
-```
-Actions bitince: https://github.com/ismsahin/Burrow-Notch/releases/latest/download/Burrow.dmg
-Not: Yerel `scripts/build-local.sh` derlemesinde besleme adresi boştur, otomatik güncelleme **almaz**. Günlük kullanım için
-uygulamayı install.sh ile kur.
+## ⏭ Sıradaki adım
+- DMG'yi indirip kur, gerçek kullanımda dene (fare, kaydırma, müzik, raf), geri bildirime göre ince ayar.
+- Kod değişikliği → `git push` → yeni sürüm otomatik. Yalnızca doküman değişikliği sürüm çıkarmaz.
 
 ## Tamamlananlar
 - [x] Çentik paneli, fare takibi, tıklama geçirgenliği (yalnızca görünen şekil tıklama alır)
@@ -37,9 +31,7 @@ uygulamayı install.sh ile kur.
   mantık birim testli, görünüm `scripts/debug-notch.sh` ile doğrulandı)
 - Müzik/Spotify çalarken uçtan uca (betikler gerçek AppleScript derleyicisinde derleniyor, ayrıştırıcı testli)
 - Medya tuşu yakalama, parlaklık, kamera, takvim izin akışları
-- GitHub Actions hattı uçtan uca (secret'lar yok; parçalar yerelde denendi: test, Release, imza, DMG,
-  `sign_update --ed-key-file -` geçici anahtarla, appcast XML)
-- DMG'nin CI'da (Finder betiklemesi) düzenli çıkması; başarısız olursa betik düz DMG'ye düşer
+- Kurulu bir sürümün Sparkle ile bir sonrakine kendiliğinden güncellenmesi (ikinci sürümde görülecek)
 
 ## Bilinen sınırlar
 - Tarayıcı medyası (YouTube vb.) görünmez → karar 0003
