@@ -5,15 +5,16 @@
 ## Özet
 v1 kodu tamamlandı, derleniyor ve 36/36 birim testi geçiyor. Release derlemesi imzalanıyor ve açılıyor. Kapalı/açık çentik,
 canlı etkinlikler, raf ve ayarlar dahili Retina ekranda **ekran görüntüsüyle doğrulandı** (`docs/ornekler/ekran-goruntuleri/`).
-**GitHub'a henüz push edilmedi**: `gh` oturumu açık değil.
+Kod **GitHub'a yüklendi**: `ismsahin/Burrow-Notch` (şu an **private**). Sürükle-bırak DMG kurulumu eklendi.
+Güncelleme anahtarları ve imza sertifikası henüz GitHub'a eklenmedi; bu yüzden Release iş akışı "gizli anahtar yok"
+adımında bilerek durur.
 
 ## ⏭ Sıradaki adım (kullanıcı yapacak)
 ```bash
-gh auth login
-scripts/setup-github.sh          # repo + Sparkle anahtarları + imza sertifikası + ilk push → ilk sürüm
-# Actions bitince:
-curl -fsSL https://raw.githubusercontent.com/<kullanıcı>/burrow/main/scripts/install.sh | bash
+gh auth login                    # GitHub.com → HTTPS → tarayıcıyla giriş
+scripts/setup-github.sh          # Burrow-Notch: public yapma onayı + anahtarlar + sertifika + push → ilk sürüm
 ```
+Actions bitince: https://github.com/ismsahin/Burrow-Notch/releases/latest/download/Burrow.dmg
 Not: Yerel `scripts/build-local.sh` derlemesinde besleme adresi boştur, otomatik güncelleme **almaz**. Günlük kullanım için
 uygulamayı install.sh ile kur.
 
@@ -27,6 +28,7 @@ uygulamayı install.sh ile kur.
 - [x] Ayarlar penceresi (5 sekme), menü çubuğu simgesi, girişte başlat
 - [x] Sparkle 2 + release.yml (test → derle → imzala → EdDSA → appcast → Release)
 - [x] install.sh (SHA-256 + codesign + sabitlenmiş sertifika parmak izi)
+- [x] Burrow.dmg: sürükle-bırak penceresi (açık arka plan, ok, Applications kısayolu); release.yml'e eklendi
 - [x] Kod incelemesi: 10 bulgu düzeltildi (bkz. ISLEM_LOG kayıt 3)
 - [x] Hafıza yapısı: AGENTS/CLAUDE/GEMINI.md, kararlar (7), referanslar, promptlar, örnekler, log
 
@@ -35,7 +37,9 @@ uygulamayı install.sh ile kur.
   mantık birim testli, görünüm `scripts/debug-notch.sh` ile doğrulandı)
 - Müzik/Spotify çalarken uçtan uca (betikler gerçek AppleScript derleyicisinde derleniyor, ayrıştırıcı testli)
 - Medya tuşu yakalama, parlaklık, kamera, takvim izin akışları
-- GitHub Actions hattı (ilk push'ta çalışacak; betikler yerelde ayrı ayrı denendi)
+- GitHub Actions hattı uçtan uca (secret'lar yok; parçalar yerelde denendi: test, Release, imza, DMG,
+  `sign_update --ed-key-file -` geçici anahtarla, appcast XML)
+- DMG'nin CI'da (Finder betiklemesi) düzenli çıkması; başarısız olursa betik düz DMG'ye düşer
 
 ## Bilinen sınırlar
 - Tarayıcı medyası (YouTube vb.) görünmez → karar 0003

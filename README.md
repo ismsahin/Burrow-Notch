@@ -7,14 +7,28 @@
 
 ---
 
-## Kurulum (tek komut)
+## Kurulum
+
+### Seçenek 1: Sürükle-bırak (klasik)
+
+1. **[Burrow.dmg'yi indir](https://github.com/ismsahin/Burrow-Notch/releases/latest/download/Burrow.dmg)** ve aç.
+2. Açılan pencerede **Burrow** simgesini **Applications (Uygulamalar)** klasörüne sürükle.
+3. Pencereyi kapat, masaüstündeki/Finder kenar çubuğundaki **Burrow** diskini çıkar (⏏).
+4. Uygulamalar'dan Burrow'u aç. **İlk açılışta** macOS "doğrulanamadı" uyarısı verir (Apple'a ücretli geliştirici kaydı
+   yapılmadığı için): **Sistem Ayarları › Gizlilik ve Güvenlik** › en altta **"Yine de Aç"** → onayla. Bir kez yapılır.
+
+<p align="center"><img src="docs/ornekler/ekran-goruntuleri/dmg-kurulum.png" width="460" alt="DMG kurulum penceresi"></p>
+
+### Seçenek 2: Tek komut (uyarısız)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/__GITHUB_REPO__/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ismsahin/Burrow-Notch/main/scripts/install.sh | bash
 ```
 
-Betik son sürümü indirir, **SHA-256** ve **kod imzası** doğrulamalarını yapar, `/Applications`'a kurar ve açar.
-Sonraki güncellemeler **uygulama içinden otomatik** gelir; bir şey yapmana gerek yok.
+Betik son sürümü indirir, **SHA-256**, **kod imzası** ve **sabitlenmiş sertifika** doğrulamalarını yapar,
+`/Applications`'a kurar ve açar. Terminal ile indirildiği için Gatekeeper uyarısı çıkmaz.
+
+İki yöntemde de sonraki güncellemeler **uygulama içinden otomatik** gelir; bir şey yapmana gerek yok.
 
 > Gereksinim: macOS 14 Sonoma veya üstü. Çentiksiz Mac'lerde ve harici ekranlarda sanal çentik çizilir.
 
@@ -52,8 +66,8 @@ Her izin yalnızca ilgili özellik kullanıldığında istenir ve her özellik a
 - Kurulum betiği SHA-256 ve `codesign --verify --strict` doğrulaması yapar.
 - Ağ erişimi: yalnızca GitHub (güncelleme) ve Spotify kapak CDN'i (https, izinli alan adı listesi).
 - Veri toplama / analitik **yok**.
-- Uygulama Apple Developer ID ile noter onaylı değildir (ücretli hesap gerektirir). Bu yüzden tarayıcıdan zip indirip
-  açarsan macOS uyarı verir; kurulum betiği bu adımı güvenli biçimde halleder.
+- Uygulama Apple Developer ID ile noter onaylı değildir (ücretli hesap gerektirir). Bu yüzden DMG ile kurulumda ilk açılışta
+  macOS bir kez uyarı verir ("Yine de Aç"). Kurulum betiği bu adımı gerektirmez.
 
 ## Geliştirme
 

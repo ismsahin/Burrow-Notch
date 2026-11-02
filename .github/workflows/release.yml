@@ -43,7 +43,7 @@ jobs:
 
       - name: Proje üret
         run: |
-          brew install xcodegen
+          brew install xcodegen create-dmg
           xcodegen generate
 
       - name: Test
@@ -98,7 +98,10 @@ jobs:
           /usr/libexec/PlistBuddy -c "Print :SUFeedURL" "$APP/Contents/Info.plist"
           mkdir -p dist
           ditto -c -k --sequesterRsrc --keepParent "$APP" dist/Burrow.zip
-          (cd dist && shasum -a 256 Burrow.zip > SHA256SUMS)
+          # Sürükle-bırak kurulum diski (Sparkle güncellemeleri zip'i kullanır, DMG ilk kurulum içindir)
+          IDENTITY="${{ steps.cert.outputs.identity }}"
+          scripts/make-dmg.sh "$APP" dist/Burrow.dmg "$([[ "$IDENTITY" == "-" ]] && echo "" || echo "$IDENTITY")"
+          (cd dist && shasum -a 256 Burrow.zip Burrow.dmg > SHA256SUMS)
 
       - name: Sparkle imzası + appcast
         env:
@@ -121,7 +124,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "v${{ steps.version.outputs.version }}" \
-            dist/Burrow.zip dist/appcast.xml dist/SHA256SUMS \
+            dist/Burrow.zip dist/Burrow.dmg dist/appcast.xml dist/SHA256SUMS \
             --title "Burrow ${{ steps.version.outputs.version }}" \
             --notes "Otomatik sürüm — commit ${GITHUB_SHA::7}" \
             --latest

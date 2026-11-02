@@ -2,7 +2,7 @@
 # TEK SEFERLİK kurulum: GitHub deposu + otomatik güncelleme anahtarları + imza sertifikası.
 #
 # Önkoşul: `gh auth login` yapılmış olmalı.
-# Kullanım: scripts/setup-github.sh [depo-adı]   (varsayılan: burrow)
+# Kullanım: scripts/setup-github.sh [depo-adı]   (varsayılan: origin remote'undaki ad, yoksa burrow)
 #
 # Yaptıkları:
 #  1. Herkese açık GitHub deposu oluşturur (Sparkle'ın sürümleri indirebilmesi için public olmalı).
@@ -15,7 +15,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-REPO_NAME="${1:-burrow}"
+ORIGIN_NAME="$(git remote get-url origin 2>/dev/null | sed -E 's#.*/([^/]+)(\.git)?$#\1#; s#\.git$##')"
+REPO_NAME="${1:-${ORIGIN_NAME:-burrow}}"
 CERT_NAME="Burrow Self-Signed"
 
 command -v gh >/dev/null || { echo "gh gerekli: brew install gh"; exit 1; }
@@ -30,6 +31,19 @@ if ! gh repo view "$FULL" >/dev/null 2>&1; then
   gh repo create "$FULL" --public --description "Burrow — çentiğin içindeki küçük yuva. macOS Dynamic Island."
 fi
 git remote get-url origin >/dev/null 2>&1 || git remote add origin "https://github.com/$FULL.git"
+
+# Otomatik güncelleme ve install.sh sürümleri kimlik doğrulamasız indirir → depo public olmalı.
+if [[ "$(gh repo view "$FULL" --json visibility -q .visibility)" != "PUBLIC" ]]; then
+  echo ""
+  echo "⚠️  $FULL şu an PRIVATE. Otomatik güncelleme ve kurulum için PUBLIC olmalı (kod herkese görünür olur)."
+  read -r -p "Depoyu public yapayım mı? [e/H] " ANSWER
+  if [[ "$ANSWER" =~ ^[eEyY]$ ]]; then
+    gh repo edit "$FULL" --visibility public --accept-visibility-change-consequences
+    echo "✓ Depo public yapıldı"
+  else
+    echo "! Depo private kaldı: sürümler yayınlanır ama uygulamalar güncelleme indiremez."
+  fi
+fi
 
 # 2) Sparkle anahtarları — araçlar SPM'in checksum ile doğruladığı sabit sürümden (project.yml) alınır
 command -v xcodegen >/dev/null || { echo "xcodegen gerekli: brew install xcodegen"; exit 1; }

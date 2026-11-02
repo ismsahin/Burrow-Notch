@@ -13,4 +13,5 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/). Sürümler `1.
 - Sistem HUD'unu değiştirme (isteğe bağlı, Erişilebilirlik izni).
 - Ayarlar penceresi, menü çubuğu simgesi, girişte başlat.
 - Sparkle 2 ile otomatik güncelleme; main'e push → GitHub Release.
-- Tek komutla kurulum betiği (SHA-256 + kod imzası doğrulaması).
+- Tek komutla kurulum betiği (SHA-256 + kod imzası + sabitlenmiş sertifika doğrulaması).
+- Sürükle-bırak kurulum diski (`Burrow.dmg`): uygulamayı Uygulamalar'a sürükle, diski çıkar.

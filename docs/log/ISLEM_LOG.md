@@ -52,3 +52,18 @@ Her oturum sonunda en alta yeni kayıt ekle. **Eski kayıtları silme veya deği
     çentik görünmüyordu). İzin artık CoreBluetooth ile eşzamansız isteniyor.
 - Doğrulama: 36/36 test, Release imzalı ve açılıyor, taze açılışta çentik görünür.
 - Sıradaki: Kullanıcı `gh auth login && scripts/setup-github.sh`.
+
+## [004] 2026-11-02 — Klasör adı, GitHub, DMG kurulumu
+- Yapan: Claude Code (Opus 5.5)
+- Ne yapıldı:
+  - Proje klasörü `adsız klasör` → `~/Desktop/Yazılım/Burrow`; IsmWiki eşlemesi "Burrow" yapıldı.
+  - Kullanıcı kodu `ismsahin/Burrow-Notch` deposuna push'ladı (depo private, `gh` oturumu yok → secret'lar eksik).
+  - `scripts/make-dmg.sh` + `make-dmg-background.swift`: create-dmg ile sürükle-bırak penceresi, yoksa hdiutil'e düşer.
+    Koyu arka planda Finder etiketleri okunmuyordu → açık zemine geçildi.
+  - release.yml: DMG üretip Release'e ekliyor, SHA256SUMS'a giriyor.
+  - setup-github.sh: depo adını origin'den alıyor; private ise onay sorup public yapıyor (Sparkle için şart).
+  - README: DMG adımları + Gatekeeper "Yine de Aç" açıklaması; yer tutucular `ismsahin/Burrow-Notch` ile dolduruldu.
+- Doğrulama: DMG açıldı, ekran görüntüsü (`docs/ornekler/ekran-goruntuleri/dmg-kurulum.png`); DMG'den kopyalanan uygulama
+  imza doğrulamasını geçti ve açıldı; disk çıkarıldı. sign_update stdin + appcast zinciri geçici ed25519 anahtarla denendi.
+  36/36 test, iş akışı YAML geçerli.
+- Sıradaki: kullanıcı `gh auth login && scripts/setup-github.sh`.

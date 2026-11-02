@@ -36,6 +36,7 @@ Kod sıfırdan yazılmıştır; iki uygulamanın kodu kopyalanmamıştır (Borin
 | Yerel kur & aç | `scripts/build-local.sh` |
 | Simgeyi yeniden üret | `swift scripts/make-icon.swift Burrow/Resources/Assets.xcassets/AppIcon.appiconset` |
 | GitHub + güncelleme kurulumu (tek sefer) | `gh auth login && scripts/setup-github.sh` |
+| DMG üret | `scripts/make-dmg.sh <Burrow.app> dist/Burrow.dmg` (`brew install create-dmg` önerilir) |
 | Yeni sürüm yayınla | `main`'e kod push'la → `.github/workflows/release.yml` otomatik yayınlar |
 
 ## 5. Kurallar

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Burrow tek komutla kurulum:
-#   curl -fsSL https://raw.githubusercontent.com/__GITHUB_REPO__/main/scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/ismsahin/Burrow-Notch/main/scripts/install.sh | bash
 #
 # Ne yapar: GitHub'daki son sürümü indirir, SHA-256 ve kod imzasını doğrular,
 # /Applications'a (yazılamıyorsa ~/Applications) kurar ve açar. Sonraki güncellemeler uygulama içinden otomatik gelir.
 set -euo pipefail
 
-REPO="${BURROW_REPO:-__GITHUB_REPO__}"
+REPO="${BURROW_REPO:-ismsahin/Burrow-Notch}"
 # Yayın sertifikasının SHA-256 parmak izi (setup-github.sh doldurur). Zip + SHA256SUMS aynı sürümden geldiği için
 # yalnızca bütünlük sağlar; asıl kimlik doğrulaması bu sabitlenmiş sertifikadır.
 CERT_PIN="__CERT_SHA256__"

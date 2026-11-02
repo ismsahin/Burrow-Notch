@@ -61,7 +61,7 @@ Aynı türdeki güncelleme (ses 40% → 45%) her zaman yerini alır ve süreyi y
 git push main ─► GitHub Actions (release.yml)
    test ─► Release derle (BURROW_FEED_URL, BURROW_PUBLIC_ED_KEY enjekte)
    ─► scripts/sign-app.sh (self-signed sertifika ya da ad-hoc)
-   ─► Burrow.zip + SHA256SUMS
+   ─► Burrow.zip (Sparkle) + Burrow.dmg (ilk kurulum, scripts/make-dmg.sh) + SHA256SUMS
    ─► sign_update (ed25519, SPARKLE_PRIVATE_KEY secret) ─► scripts/make-appcast.sh ─► appcast.xml
    ─► gh release create v1.0.<run_number> --latest
 Kurulu uygulama ─► https://github.com/<repo>/releases/latest/download/appcast.xml (saatlik)
